@@ -16,6 +16,7 @@
 ; Global variables
 A_ScriptName := "AS Icon Viewer v1.0"
 TraySetIcon("imageres.dll", 338)
+A_IconHidden := false
 
 global CurrentDllPath := ""
 global CurrentViewMode := 3 ; 0:SmallReport, 1:LargeReport, 2:SmallIcon, 3:LargeIcon
