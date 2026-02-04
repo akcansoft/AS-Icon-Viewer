@@ -316,10 +316,15 @@ LoadIcons(*) {
 		}
 	}
 
+	; 2026-02-04 AMB, Retain current view mode (persistent)
+	ApplyViewMode()
+
+	/*
 	; Default to "Large Icon" view (CurrentViewMode 3)
 	CurrentViewMode := 3
 	lv_Icons.Opt("+Icon")
 	lv_Icons.SetImageList(IL_Large, 0)
+	*/
 
 	; Batch add rows to the ListView
 	Loop iconLoadedCount {
@@ -379,6 +384,8 @@ SwitchView(*) {
 	global lv_Icons, IL_Small, IL_Large, CurrentViewMode, mGui
 
 	CurrentViewMode := Mod(CurrentViewMode + 1, 4)
+	ApplyViewMode()
+
 	/*
 	CurrentViewMode Values:
 	0: Small Icon - Report View (Small Report)
@@ -387,8 +394,19 @@ SwitchView(*) {
 	3: Large Icon - Icon View (Large Icon)
 	*/
 
+	/*
 	isReportView := CurrentViewMode < 2
 	isLargeIcon := (CurrentViewMode = 1) || (CurrentViewMode = 3)
+
+	lv_Icons.Opt(isReportView ? "+Report" : "+Icon")
+	lv_Icons.SetImageList(isLargeIcon ? IL_Large : IL_Small, isReportView)
+	*/
+}
+
+; Allow persistent view mode
+ApplyViewMode() {
+	isReportView	:= CurrentViewMode < 2
+	isLargeIcon		:= (CurrentViewMode = 1) || (CurrentViewMode = 3)
 
 	lv_Icons.Opt(isReportView ? "+Report" : "+Icon")
 	lv_Icons.SetImageList(isLargeIcon ? IL_Large : IL_Small, isReportView)
