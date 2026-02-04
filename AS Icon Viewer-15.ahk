@@ -115,7 +115,7 @@ btn_Switch.OnEvent("Click", SwitchView)
 mGui.SetFont("s9", "Segoe UI")
 
 ; Icons ListView
-lv_Icons := mGui.AddListView("x270 y35 w400 h470 Grid", ["Icon and Number"])
+lv_Icons := mGui.AddListView("x270 y35 w400 h470 Grid -multi", ["Icon and Number"])
 lv_Icons.ModifyCol(1, 380)
 
 ; Right-click menu for Icons (Item selected)
