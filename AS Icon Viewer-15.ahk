@@ -1016,3 +1016,26 @@ youtube.com/mesutakcan
 
 	MsgBox(aboutText, "About", "Iconi")
 }
+
+; 2026-02-04 AMB, Improves right/left arrow navigation...
+; (prevents navigation locks at extreme left/right position of window)
+#HotIf (WinActive(mGui.hwnd) && ControlGetFocus(mGui.hwnd) = lv_Icons.hwnd)
+right::
+{
+	item := lv_Icons.GetNext(,"F")							; get current item number
+	if (item < lv_Icons.GetCount()) {						; if not at end of list...
+		lv_Icons.Modify(0, "-focus -select")				; ... deselect all
+		lv_Icons.Modify(item+1, "+focus +select")			; ... select next item in list
+		ShowPreview()										; ... update preview
+	}
+}
+left::
+{
+	item := lv_Icons.GetNext(,"F")							; get current item number
+	if (item > 1) {											; if not first item in list...
+		lv_Icons.Modify(0, "-focus -select")				; ... deselect all
+		lv_Icons.Modify(item-1, "+focus +select")			; ... select previous item in list
+		ShowPreview()										; ... update preview
+	}
+}
+#HotIf
