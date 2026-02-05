@@ -31,8 +31,8 @@ It is specifically designed for developers and power users who need to find icon
 ## 📦 Installation & Usage
 
 1.  Download or clone this repository to your local machine.
-2.  Ensure `AS Icon Viewer-15.ahk` and `SaveFileDialog.ahk` are in the same directory.
-3.  Launch `AS Icon Viewer-15.ahk`.
+2.  Ensure `AS Icon Viewer-16.ahk` and `SaveFileDialog.ahk` are in the same directory.
+3.  Launch `AS Icon Viewer-16.ahk`.
 
 ## 🎮 Interface Controls
 
