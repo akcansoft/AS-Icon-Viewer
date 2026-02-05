@@ -7,7 +7,7 @@
 
 It is specifically designed for developers and power users who need to find icon indices quickly or export high-quality assets for their projects.
 
-![Ekran Görüntüsü](screen-shot-1.png)
+![Screen Shot](screen-shot-1.png)
 
 ## ✨ Features
 
@@ -19,7 +19,7 @@ It is specifically designed for developers and power users who need to find icon
     * Save icons as **ICO**, **PNG**, **BMP**, or **JPG**.
     * Copy icon images directly to the **Clipboard** for use in design tools.
 -   **🛠️ Developer Integration:**
-    * **Code Generation:** Copy ready-to-use AHK code (e.g., `TraySetIcon("shell32.dll", 23)`).
+    * **Code Generation:** Copy ready-to-use AHK code (e.g., `TraySetIcon("C:\WINDOWS\System32\shell32.dll", 23)`).
     * **Live Preview:** Instantly apply a selected icon to the application's tray and window to test its appearance.
 -   **🚀 High Performance:** Utilizes the Windows API (`PrivateExtractIconsW`) for dynamic, unlimited, and fast icon extraction.
 
@@ -31,8 +31,8 @@ It is specifically designed for developers and power users who need to find icon
 ## 📦 Installation & Usage
 
 1.  Download or clone this repository to your local machine.
-2.  Ensure `AS Icon Viewer-16.ahk` and `SaveFileDialog.ahk` are in the same directory.
-3.  Launch `AS Icon Viewer-16.ahk`.
+2.  Ensure `AS Icon Viewer.ahk` , `SaveFileDialog.ahk` and `app_icon.ico` are in the same directory.
+3.  Launch `AS Icon Viewer.ahk`.
 
 ## 🎮 Interface Controls
 
@@ -45,7 +45,7 @@ It is specifically designed for developers and power users who need to find icon
 
 ## 📂 Project Structure
 
-* `AS Icon Viewer-15.ahk`: Core application logic and GUI definition.
+* `AS Icon Viewer.ahk`: Core application logic and GUI definition.
 * `SaveFileDialog.ahk`: A helper library providing a modern Windows "Save As" interface.
 * `saved_files.txt`: Automatically persists your recently accessed files.
 * `favorites.txt`: Stores your bookmarked icons.
