@@ -1,6 +1,7 @@
 ; AS Icon Viewer
-; v1.0
-; 03/02/2026
+; v1.01
+; R16
+; 05/02/2026
 
 ; Mesut Akcan
 ; -----------
@@ -14,8 +15,9 @@
 #Include SaveFileDialog.ahk
 
 ; Global variables
-A_ScriptName := "AS Icon Viewer v1.0"
-TraySetIcon("imageres.dll", 338)
+A_ScriptName := "AS Icon Viewer v1.01"
+;try TraySetIcon(A_WinDir "\System32\imageres.dll", 338)
+try TraySetIcon(A_ScriptDir "\app_icon.ico")
 
 global CurrentDllPath := ""
 global CurrentViewMode := 3 ; 0:SmallReport, 1:LargeReport, 2:SmallIcon, 3:LargeIcon
@@ -51,7 +53,7 @@ global Txt := {
 
 ; Create main GUI
 mGui := Gui("+Resize +MinSize900x450", A_ScriptName)
-mGui.SetFont("s10", "Segoe UI")
+mGui.SetFont("s9", "Segoe UI")
 
 ; ========== MENU BAR ==========
 ; File Menu
@@ -84,7 +86,7 @@ mnu_Help := Menu()
 mnu_Help.Add("&About...", (*) => ShowAbout())
 mnu_Help.Add() ; Separator
 mnu_Help.Add("Visit &Website", (*) => Run("https://mesutakcan.blogspot.com"))
-mnu_Help.Add("&GitHub Repository", (*) => Run("https://github.com/akcansoft"))
+mnu_Help.Add("&GitHub Repository", (*) => Run("https://github.com/akcansoft/AS-Icon-Viewer"))
 
 ; Main Menu Bar
 mnu_Main := MenuBar()
@@ -996,5 +998,5 @@ github.com/akcansoft
 youtube.com/mesutakcan
 )"
 
-	MsgBox(aboutText, "About", "Iconi")
+MsgBox(aboutText, "About", "Iconi")
 }
