@@ -3,3 +3,5 @@
 
 # Docs images
 docs/ export-ignore
+
+.gitattributes export-ignore
