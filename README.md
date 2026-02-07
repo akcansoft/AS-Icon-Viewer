@@ -9,7 +9,7 @@
 
 **AS Icon Viewer** empowers developers and power users to effortlessly view, extract, and manage icons embedded within Windows executables (`.exe`), dynamic-link libraries (`.dll`), and icon files (`.ico`). Perfect for finding icon indices, exporting high-quality assets, and managing your favorite icons.
 
-![AS Icon Viewer Screenshot](screen-shot-1.png)
+![AS Icon Viewer Screenshot](docs/screen-shot-1.png)
 
 ## ✨ Key Features
 
@@ -126,22 +126,6 @@
 | **Status Bar** | Real-time feedback on operations and icon counts |
 | **Menu Bar** | Full access to all features and settings |
 
-## 📂 Project Structure
-
-```
-AS-Icon-Viewer/
-│
-├── AS Icon Viewer.ahk     # Main application script
-├── SaveFileDialog.ahk         # Modern Windows Save dialog library
-├── app_icon.ico               # Application icon
-├── AS Icon Viewer-x64.exe     # 64-bit compiled version
-├── AS Icon Viewer-x32.exe     # 32-bit compiled version
-├── saved_files.txt            # Auto-saved file history (generated)
-├── favorites.txt              # Saved favorite icons (generated)
-├── screen-shot-1.png          # Screenshot for README
-└── README.md                  # This file
-```
-
 ## ⌨️ Keyboard Shortcuts
 
 | Shortcut | Action |
@@ -173,22 +157,26 @@ AS Icon Viewer includes these Windows system libraries by default:
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how you can help:
+Contributions are welcome and appreciated.
 
-1. **Fork** the repository
-2. **Create** a feature branch
-   ```bash
-   git checkout -b feature/AmazingFeature
-   ```
-3. **Commit** your changes
-   ```bash
-   git commit -m 'Add some AmazingFeature'
-   ```
-4. **Push** to the branch
-   ```bash
-   git push origin feature/AmazingFeature
-   ```
-5. **Open** a Pull Request
+If you would like to contribute to this project, please follow these guidelines:
+
+- Fork the repository and create your branch from `main`
+- Make sure your code follows the existing style and structure
+- Test your changes before submitting
+- Clearly describe what your change does and why it is needed
+
+### 🐛 Bug Reports & Feature Requests
+
+- Use GitHub Issues to report bugs or suggest new features
+- Please include clear steps to reproduce bugs, if applicable
+- Feature requests should explain the use case and expected behavior
+
+### Pull Requests
+
+- Keep pull requests focused and limited to a single purpose
+- Make sure your changes do not break existing functionality
+- Update documentation if your change affects usage or behavior
 
 ### Development Guidelines
 - Follow AutoHotkey v2 best practices
@@ -196,13 +184,7 @@ Contributions are welcome! Here's how you can help:
 - Update documentation for new features
 - Maintain code comments and formatting
 
-## 🐛 Bug Reports & Feature Requests
-
-Found a bug or have a feature idea? Please open an issue on the [Issues](https://github.com/akcansoft/AS-Icon-Viewer/issues) page with:
-- A clear description
-- Steps to reproduce (for bugs)
-- Expected vs actual behavior
-- Screenshots if applicable
+Thank you for taking the time to contribute.
 
 ## 📜 License
 
