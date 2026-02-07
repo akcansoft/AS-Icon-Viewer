@@ -1,7 +1,6 @@
 ; AS Icon Viewer
-; v1.02
-; R18
-; 05/02/2026
+; 07/02/2026
+; R20
 
 ; Mesut Akcan
 ; -----------
@@ -11,14 +10,14 @@
 
 #Requires AutoHotkey v2
 #SingleInstance Force
-;#NoTrayIcon
-#Include SaveFileDialog.ahk
+
+#Include Gdip.ahk ; GDI+
+#Include SaveFileDialog.ahk ; Custom Save File Dialog
 
 ; Global variables
-A_ScriptName := "AS Icon Viewer v1.02"
+A_ScriptName := "AS Icon Viewer v1.1"
 global CurrentDllPath := ""
 global CurrentViewMode := 3 ; 0:SmallReport, 1:LargeReport, 2:SmallIcon, 3:LargeIcon
-global AllIcons := [] ; Array of all loaded icons
 global IL_Small := 0 ; Small ImageList
 global IL_Large := 0 ; Large ImageList
 global SettingsFile := A_ScriptDir "\saved_files.txt"
@@ -29,8 +28,6 @@ global FavoriteIcons := []
 global dllFileListChanged := false
 global FavoritesListChanged := false
 global PreviewIcon := { Path: "", Num: 0 }
-
-global gdipToken := 0
 
 global Txt := {
 	Remove: "➖ Remove",
@@ -53,7 +50,7 @@ global Txt := {
 
 ; ========== TRAY ICON & MENU ==========
 try TraySetIcon(A_ScriptDir "\app_icon.ico")
-Tray := A_TrayMenu ; For convenience.
+Tray := A_TrayMenu
 Tray.Delete() ; Delete the standard items.
 Tray.Add "Open " A_ScriptName, (*) => mGui.Show()
 Tray.Add() ; separator
@@ -221,7 +218,8 @@ DefaultDllFiles := [
 ; Fill DLL list
 InitializeDllList()
 LoadFavorites()
-InitGDIPlus()
+Gdip.Startup() ; Initialize GDI+
+OnMessage(0x0100, OnLvKeyDown) ; Handle arrow keys for linear navigation in ListView
 
 ; Event handlers
 lst_Files.OnEvent("Change", LoadIcons)
@@ -242,7 +240,7 @@ InitializeDllList() {
 	if FileExist(SettingsFile) {
 		try {
 			savedFiles := FileRead(SettingsFile)
-			Loop Parse, savedFiles, "`n", "`r" {
+			loop parse, savedFiles, "`n", "`r" {
 				if (A_LoopField != "" && FileExist(A_LoopField))
 					lst_Files.Add([A_LoopField])
 			}
@@ -261,7 +259,7 @@ InitializeDllList() {
 
 ; Load icons from the selected DLL/EXE/ICO file
 LoadIcons(*) {
-	global lv_Icons, lst_Files, lbl_Status, CurrentDllPath, AllIcons, CurrentViewMode
+	global lv_Icons, lst_Files, lbl_Status, CurrentDllPath, CurrentViewMode
 	global IL_Small, IL_Large
 
 	; Check if a file is selected in the list
@@ -278,7 +276,6 @@ LoadIcons(*) {
 
 	; Clear existing UI data and icon arrays
 	lv_Icons.Delete()
-	AllIcons := []
 
 	; Destroy previous ImageLists to free up memory
 	try IL_Destroy(IL_Small)
@@ -307,8 +304,9 @@ LoadIcons(*) {
 
 	iconLoadedCount := 0
 
+	lv_Icons.Opt("-Redraw") ; Disable redraw during loading for performance
 	; Loop through the total number of icons found
-	Loop iconCountTotal {
+	loop iconCountTotal {
 		iconIndex := A_Index
 
 		; Add icon to small ImageList
@@ -322,26 +320,20 @@ LoadIcons(*) {
 			continue
 
 		iconLoadedCount++
-		AllIcons.Push({ num: iconIndex })
+		lv_Icons.Add("Icon" . iconLoadedCount, iconIndex) ; Add directly to ListView
 
 		; Update status bar progress every 20 icons for better UI responsiveness
 		if (Mod(iconLoadedCount, 20) = 0) {
 			lbl_Status.Text := "⏳ Loaded: " . iconLoadedCount . " / " . iconCountTotal . " icons "
 		}
 	}
+	lv_Icons.Opt("+Redraw") ; Re-enable redraw
 
 	; Apply current view mode
 	isReportView := CurrentViewMode < 2
 	isLargeIcon := (CurrentViewMode = 1) || (CurrentViewMode = 3)
 	lv_Icons.Opt(isReportView ? "+Report" : "+Icon")
 	lv_Icons.SetImageList(isLargeIcon ? IL_Large : IL_Small, isReportView)
-
-	; Batch add rows to the ListView
-	lv_Icons.Opt("-Redraw")
-	Loop iconLoadedCount {
-		lv_Icons.Add("Icon" . A_Index, AllIcons[A_Index].num)
-	}
-	lv_Icons.Opt("+Redraw")
 
 	; Final status update
 	lbl_Status.Text := "✅ " . iconLoadedCount . " icons loaded | File: " . CurrentDllPath
@@ -467,7 +459,8 @@ CopyIconToClipboard(*) {
 		DllCall("DeleteObject", "Ptr", hBrush)
 
 		; Draw icon on bitmap
-		DllCall("DrawIconEx", "Ptr", hdcMem, "Int", 0, "Int", 0, "Ptr", hIcon, "Int", 128, "Int", 128, "UInt", 0, "Ptr", 0, "UInt", 0x0003) ; DI_NORMAL
+		DllCall("DrawIconEx", "Ptr", hdcMem, "Int", 0, "Int", 0, "Ptr", hIcon, "Int", 128, "Int", 128, "UInt", 0, "Ptr",
+			0, "UInt", 0x0003) ; DI_NORMAL
 
 		; Cleanup
 		DllCall("SelectObject", "Ptr", hdcMem, "Ptr", hOldBitmap)
@@ -493,7 +486,7 @@ CopyIconToClipboard(*) {
 	}
 }
 
-; Save current icon to file (PNG)
+; Save current icon to file
 SaveIconToFile(*) {
 	global lbl_Status, PreviewIcon, mGui
 
@@ -523,63 +516,13 @@ SaveIconToFile(*) {
 		if (!hIcon)
 			throw Error("Failed to load icon")
 
-		SaveHICONToFile(hIcon, savePath)
+		Gdip.SaveHICONToFile(hIcon, savePath) ; Use GDI+ to save the icon in the correct format based on file extension
 		DllCall("DestroyIcon", "Ptr", hIcon)
 
 		lbl_Status.Text := "✅ Saved: " savePath
 		ShowTempTooltip("✅ Icon saved!")
 	} catch as err {
 		MsgBox("Error saving image: " err.Message, "Error", "Icon!")
-	}
-}
-
-; Helper to save HICON to various formats using GDI+
-SaveHICONToFile(hIcon, filePath) {
-	SplitPath(filePath, , , &ext)
-	ext := StrLower(ext)
-
-	; CLSIDs for image formats
-	clsids := Map(
-		"png", "{557CF406-1A04-11D3-9A73-0000F81EF32E}",
-		"bmp", "{557CF400-1A04-11D3-9A73-0000F81EF32E}",
-		"jpg", "{557CF401-1A04-11D3-9A73-0000F81EF32E}",
-		"jpeg", "{557CF401-1A04-11D3-9A73-0000F81EF32E}"
-	)
-
-	pBitmap := 0 ; Initialize pBitmap to 0
-	if (DllCall("gdiplus\GdipCreateBitmapFromHICON", "Ptr", hIcon, "Ptr*", &pBitmap) != 0) { ; GdipStatus Ok = 0
-		throw Error("Failed to create GDI+ bitmap from HICON.")
-	}
-
-	if (ext = "ico") {
-		; For ICO, we save as PNG first (to preserve transparency) and wrap it in an ICO container
-		tempFile := A_Temp "\temp_icon_" A_TickCount ".png"
-		DllCall("ole32\CLSIDFromString", "Str", clsids["png"], "Ptr", Encoder := Buffer(16))
-		DllCall("gdiplus\GdipSaveImageToFile", "Ptr", pBitmap, "WStr", tempFile, "Ptr", Encoder, "Ptr", 0)
-
-		try {
-			pngData := FileRead(tempFile, "RAW")
-			f := FileOpen(filePath, "w")
-			; ICONDIR
-			f.WriteUShort(0), f.WriteUShort(1), f.WriteUShort(1)
-			; ICONDIRENTRY
-			f.WriteUChar(128) ; Width
-			f.WriteUChar(128) ; Height
-			f.WriteUChar(0), f.WriteUChar(0)
-			f.WriteUShort(1), f.WriteUShort(32)
-			f.WriteUInt(pngData.Size)
-			f.WriteUInt(22) ; Offset (6+16)
-			f.RawWrite(pngData)
-			f.Close()
-			FileDelete(tempFile)
-		}
-	} else if clsids.Has(ext) {
-		DllCall("ole32\CLSIDFromString", "Str", clsids[ext], "Ptr", Encoder := Buffer(16))
-		DllCall("gdiplus\GdipSaveImageToFile", "Ptr", pBitmap, "WStr", filePath, "Ptr", Encoder, "Ptr", 0)
-	}
-
-	if (pBitmap) {
-		DllCall("gdiplus\GdipDisposeImage", "Ptr", pBitmap)
 	}
 }
 
@@ -717,7 +660,7 @@ LoadFavorites() {
 	FavoriteIcons := []
 
 	if FileExist(FavoritesFile) {
-		Loop Read, FavoritesFile {
+		loop read, FavoritesFile {
 			favString := A_LoopReadLine
 			if (Trim(favString) = "")
 				continue
@@ -825,7 +768,7 @@ RemoveCustomFile(*) {
 
 ; Clear all files from list
 ClearFileList(*) {
-	global lst_Files, lv_Icons, CurrentDllPath, lbl_Status, AllIcons, dllFileListChanged
+	global lst_Files, lv_Icons, CurrentDllPath, lbl_Status, dllFileListChanged
 
 	if (SendMessage(0x018B, 0, 0, lst_Files.Hwnd) == 0) ; LB_GETCOUNT
 		return
@@ -835,7 +778,6 @@ ClearFileList(*) {
 
 	lst_Files.Delete()
 	lv_Icons.Delete()
-	AllIcons := []
 	CurrentDllPath := ""
 	dllFileListChanged := true
 	lbl_Status.Text := "🗑️ List cleared"
@@ -843,10 +785,10 @@ ClearFileList(*) {
 
 ; Save file list and exit
 CloseApplication(*) {
-	SaveFileList()
-	SaveFavorites()
-	ShutdownGDIPlus()
-	ExitApp()
+	SaveFileList() ; Save file list to disk
+	SaveFavorites() ; Save favorites to disk
+	Gdip.Shutdown() ; Cleanup GDI+ resources
+	ExitApp() ; Close application
 }
 
 ; Save current file list to disk
@@ -873,11 +815,8 @@ SaveFileList() {
 ; Check if a file path already exists in the file list
 IsFileInList(filePath) {
 	global lst_Files
-	itemCount := SendMessage(0x018B, 0, 0, lst_Files.Hwnd) ; LB_GETCOUNT
-	Loop itemCount {
-		textBuf := Buffer(1024)
-		SendMessage(0x0189, A_Index - 1, textBuf, lst_Files.Hwnd) ; LB_GETTEXT
-		if (StrGet(textBuf) = filePath)
+	for item in ControlGetItems(lst_Files) {
+		if (item = filePath)
 			return true
 	}
 	return false
@@ -929,7 +868,9 @@ GuiSize(GuiObj, MinMax, Width, Height) {
 	if (MinMax = -1)
 		return
 
-	global mGui, lst_Files, lv_Icons, lbl_Status, CurrentViewMode, pic_Preview, lbl_IconNo, edt_IconCode, lbl_Preview, btn_CopyImage, btn_SaveImage, btn_CopyCode, btn_Test, btn_Switch, lv_Favorites, btn_FavAdd, btn_FavRemove, lbl_Favorites, btn_FavClear
+	global mGui, lst_Files, lv_Icons, lbl_Status, CurrentViewMode, pic_Preview, lbl_IconNo, edt_IconCode, lbl_Preview,
+		btn_CopyImage, btn_SaveImage, btn_CopyCode, btn_Test, btn_Switch, lv_Favorites, btn_FavAdd, btn_FavRemove,
+		lbl_Favorites, btn_FavClear
 
 	GuiRedraw(GuiObj, 0) ; Disable redraw to prevent flickering
 
@@ -985,26 +926,32 @@ GuiRedraw(GuiObj, redraw) {
 
 ; ========== HELPER FUNCTIONS ==========
 
-; Initialize GDI+ library at script start
-InitGDIPlus() {
-	global gdipToken
-	hModule := DllCall("LoadLibrary", "Str", "gdiplus", "Ptr")
-	si := Buffer(24, 0), NumPut("UInt", 1, si)
-	DllCall("gdiplus\GdiplusStartup", "Ptr*", &gdipToken, "Ptr", si, "Ptr", 0)
-}
-
-; Shutdown GDI+ library at script end
-ShutdownGDIPlus() {
-	global gdipToken
-	if (gdipToken) {
-		DllCall("gdiplus\GdiplusShutdown", "Ptr", gdipToken)
-	}
-}
 
 ; Show a tooltip for a short duration
 ShowTempTooltip(message, duration := 1500) {
 	ToolTip(message, , , 1)
 	SetTimer(() => ToolTip(, , , 1), -duration)
+}
+
+; Handle arrow key navigation in ListView
+OnLvKeyDown(wParam, lParam, msg, hwnd) {
+	global lv_Icons
+	if (!IsSet(lv_Icons) || !lv_Icons) ; Safety check if GUI is not destroyed but variable is cleared
+		return
+
+	if (hwnd = lv_Icons.Hwnd) { ; Left or Right arrow keys
+		dir := (wParam = 39) ? 1 : (wParam = 37) ? -1 : 0 ; Right = 39, Left = 37
+		if (dir) { ; Arrow key pressed
+			item := lv_Icons.GetNext(0, "Focused") ; Get currently focused item
+			nextItem := item + dir ; Calculate next item index
+			if (nextItem > 0 && nextItem <= lv_Icons.GetCount()) { ; Valid next item
+				lv_Icons.Modify(0, "-Focus -Select") ; Remove focus and selection from current item
+				lv_Icons.Modify(nextItem, "+Focus +Select +Vis") ; Focus, select, and ensure next item is visible
+				ShowPreview() ; Update preview for new selection
+				return 0 ; Prevent default handling
+			}
+		}
+	}
 }
 
 ; Show About dialog
@@ -1021,26 +968,3 @@ youtube.com/mesutakcan
 
 	MsgBox(aboutText, "About", "Iconi")
 }
-
-; AMB, Improves right/left arrow navigation
-; prevents navigation locks at extreme left/right position of window
-#HotIf (WinActive(mGui.hwnd) && ControlGetFocus(mGui.hwnd) = lv_Icons.hwnd)
-right::
-{
-	item := lv_Icons.GetNext(, "F") ; get current item number
-	if (item < lv_Icons.GetCount()) { ; if not at end of list
-		lv_Icons.Modify(0, "-focus -select") ; deselect all
-		lv_Icons.Modify(item + 1, "+focus +select") ; select next item in list
-		ShowPreview() ; update preview
-	}
-}
-left::
-{
-	item := lv_Icons.GetNext(, "F") ; get current item number
-	if (item > 1) {	; if not first item in list
-		lv_Icons.Modify(0, "-focus -select") ; deselect all
-		lv_Icons.Modify(item - 1, "+focus +select")	; select previous item in list
-		ShowPreview()	; update preview
-	}
-}
-#HotIf
