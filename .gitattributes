@@ -1,0 +1,11 @@
+# Exclude everything
+* export-ignore
+
+# Include these
+!src/ export-ignore
+!src/** export-ignore
+!README.md export-ignore
+!LICENSE export-ignore
+
+# Exclude executable files
+*.exe export-ignore
