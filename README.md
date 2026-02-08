@@ -3,9 +3,13 @@
 [![AutoHotkey](https://img.shields.io/badge/Language-AutoHotkey_v2-green.svg)](https://www.autohotkey.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows-blue.svg)](https://www.microsoft.com/windows)
 [![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.02-brightgreen.svg)](https://github.com/akcansoft/AS-Icon-Viewer/releases)
+[![Version](https://img.shields.io/badge/Version-1.1-brightgreen.svg)](https://github.com/akcansoft/AS-Icon-Viewer/releases)
 
-> A professional-grade icon extraction and management tool for Windows, built with AutoHotkey v2
+![GitHub stars](https://img.shields.io/github/stars/akcansoft/AS-Icon-Viewer?style=social)
+![GitHub forks](https://img.shields.io/github/forks/akcansoft/AS-Icon-Viewer?style=social)
+![GitHub issues](https://img.shields.io/github/issues/akcansoft/AS-Icon-Viewer)
+
+> A professional-grade icon extraction and management tool for Windows, built with [AutoHotkey v2](https://www.autohotkey.com/)
 
 **AS Icon Viewer** empowers developers and power users to effortlessly view, extract, and manage icons embedded within Windows executables (`.exe`), dynamic-link libraries (`.dll`), and icon files (`.ico`). Perfect for finding icon indices, exporting high-quality assets, and managing your favorite icons.
 
@@ -203,15 +207,3 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 - 🌐 Blog: [mesutakcan.blogspot.com](https://mesutakcan.blogspot.com)
 - 💻 GitHub: [@akcansoft](https://github.com/akcansoft)
 - 📺 YouTube: [mesutakcan](https://youtube.com/mesutakcan)
-
-## 📊 Project Stats
-
-![GitHub stars](https://img.shields.io/github/stars/akcansoft/AS-Icon-Viewer?style=social)
-![GitHub forks](https://img.shields.io/github/forks/akcansoft/AS-Icon-Viewer?style=social)
-![GitHub issues](https://img.shields.io/github/issues/akcansoft/AS-Icon-Viewer)
-
----
-
-<p align="center">
-  <a href="#-as-icon-viewer">Back to Top ⬆️</a>
-</p>
