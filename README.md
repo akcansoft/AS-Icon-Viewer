@@ -3,7 +3,7 @@
 [![AutoHotkey](https://img.shields.io/badge/Language-AutoHotkey_v2-green.svg)](https://www.autohotkey.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows-blue.svg)](https://www.microsoft.com/windows)
 [![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.1-brightgreen.svg)](https://github.com/akcansoft/AS-Icon-Viewer/releases)
+[![Version](https://img.shields.io/badge/Version-1.2-brightgreen.svg)](https://github.com/akcansoft/AS-Icon-Viewer/releases)
 
 ![GitHub stars](https://img.shields.io/github/stars/akcansoft/AS-Icon-Viewer?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/akcansoft/AS-Icon-Viewer?style=social)
@@ -14,6 +14,13 @@
 **AS Icon Viewer** empowers developers and power users to effortlessly view, extract, and manage icons embedded within Windows executables (`.exe`), dynamic-link libraries (`.dll`), and icon files (`.ico`). Perfect for finding icon indices, exporting high-quality assets, and managing your favorite icons.
 
 ![AS Icon Viewer Screenshot](docs/screen-shot-1.png)
+
+## 🆕 What's New (v1.2)
+
+- **Export Size Selector:** Choose 16–256px sizes for preview and saved icons
+- **Better Transparency:** Clipboard copy now uses PNG with alpha
+- **Improved Exports:** Higher-quality alpha handling and cleaner ICO output
+- **Smarter Save Dialog:** File extension follows the selected file type
 
 ## ✨ Key Features
 
@@ -29,7 +36,7 @@
   - Small Icon View
   - Large Report View
   - Small Report View
-- **High-Resolution Preview:** 128x128 pixel icon preview with index display
+- **Adjustable Preview Size:** 16–256px icon preview with index display
 - **Responsive Layout:** Fully resizable interface that adapts to your screen
 
 ### ⭐ Favorites System
@@ -44,7 +51,8 @@
   - `.png` (Transparent PNG)
   - `.bmp` (Bitmap)
   - `.jpg` (JPEG)
-- **Clipboard Integration:** Copy icon images directly to clipboard for immediate use
+- **Export Size Control:** Save at your chosen size (16–256px)
+- **Clipboard Integration:** Copy icon images as PNG with transparency
 - **Smart File Naming:** Automatically suggests descriptive filenames based on source and index
 
 ### 🛠️ Developer Tools
@@ -84,6 +92,7 @@
 3. Ensure these files are in the same directory:
    - `AS Icon Viewer.ahk`
    - `SaveFileDialog.ahk`
+   - `Gdip.ahk`
    - `app_icon.ico`
 4. Run `AS Icon Viewer.ahk`
 
@@ -99,6 +108,7 @@
 
 ### Working with Icons
 - **Preview:** Click any icon to see a high-resolution preview
+- **Size:** Use the **Size** dropdown to change preview/export size
 - **Copy Code:** Click **📋 Copy Code** to get AutoHotkey code
 - **Export:** Click **💾 Save** to export in your preferred format
 - **Test:** Click **🧪 Test icon** to preview it as the app icon
