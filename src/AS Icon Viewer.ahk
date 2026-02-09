@@ -1,6 +1,5 @@
 ; AS Icon Viewer
-; 07/02/2026
-; R20
+; 09/02/2026
 
 ; Mesut Akcan
 ; -----------
@@ -15,19 +14,22 @@
 #Include SaveFileDialog.ahk ; Custom Save File Dialog
 
 ; Global variables
-A_ScriptName := "AS Icon Viewer v1.1"
-global CurrentDllPath := ""
+A_ScriptName := "AS Icon Viewer v1.2"
+global SettingsFile := A_ScriptDir "\saved_files.txt" ; For storing user-added files in the left panel
+global FavoritesFile := A_ScriptDir "\favorites.txt" ; For storing favorite icons
+global CurrentDllPath := "" ; Currently loaded DLL/EXE/ICO file path
 global CurrentViewMode := 3 ; 0:SmallReport, 1:LargeReport, 2:SmallIcon, 3:LargeIcon
 global IL_Small := 0 ; Small ImageList
 global IL_Large := 0 ; Large ImageList
-global SettingsFile := A_ScriptDir "\saved_files.txt"
-global FavoritesFile := A_ScriptDir "\favorites.txt"
-global lv_Favorites := 0
-global IL_Favorites := 0
-global FavoriteIcons := []
-global dllFileListChanged := false
-global FavoritesListChanged := false
-global PreviewIcon := { Path: "", Num: 0 }
+global lv_Favorites := 0 ; Favorites ListView
+global IL_Favorites := 0 ; Favorites ImageList
+global FavoriteIcons := [] ; Array of { path, num }
+global dllFileListChanged := false ; To track changes in the DLL file list for saving
+global FavoritesListChanged := false ; To track changes in the favorites list for saving
+global PreviewIcon := { Path: "", Num: 0 } ; Currently previewed icon info
+global ExportIconSize := 128 ; Default export size
+global LastGuiW := 0 ; For tracking GUI size changes
+global LastGuiH := 0
 
 global Txt := {
 	Remove: "➖ Remove",
@@ -105,21 +107,21 @@ mGui.MenuBar := mnu_Main
 
 ; ========== LEFT PANEL (x10-260) ==========
 mGui.AddText("x10 y10 w250", "📁 Icon Files:")
-btn_AddFile := mGui.AddButton("x10 y35 w80 h30", Txt.Add)
+btn_AddFile := mGui.AddButton("x10 y35 w80 h30", Txt.Add) ; Add button
 btn_AddFile.OnEvent("Click", AddCustomFile)
-btn_RemoveFile := mGui.AddButton("x95 y35 w80 h30", Txt.Remove)
+btn_RemoveFile := mGui.AddButton("x95 y35 w80 h30", Txt.Remove) ; Remove button
 btn_RemoveFile.OnEvent("Click", RemoveCustomFile)
-btn_ClearList := mGui.AddButton("x180 y35 w80 h30", Txt.Clear)
+btn_ClearList := mGui.AddButton("x180 y35 w80 h30", Txt.Clear) ; Clear List button
 btn_ClearList.OnEvent("Click", ClearFileList)
-lst_Files := mGui.AddListBox("x10 y70 w250 h465 +VScroll +HScroll", [])
+lst_Files := mGui.AddListBox("x10 y70 w250 h465 +VScroll +HScroll", []) ; List of DLL/EXE/ICO files
 
 ; ========== MIDDLE PANEL (x270-740) ==========
 mGui.AddText("x270 y10 w300", "🎨 Icons:")
 
-; View selection - Radio buttons
 mGui.SetFont("s11", "Segoe MDL2 Assets")
-btn_Switch := mGui.AddButton("x600 y5 w140 h30", Chr(0xE8EB) " Switch View")
+btn_Switch := mGui.AddButton("x600 y5 w140 h30", Chr(0xE8EB) " Switch View") ; Switch View button
 btn_Switch.OnEvent("Click", SwitchView)
+
 mGui.SetFont("s9", "Segoe UI")
 
 ; Icons ListView
@@ -134,7 +136,7 @@ mnu_IconContext.Add() ; Separator
 mnu_IconContext.Add(Txt.CopyCode, (*) => CopyCurrentCode())
 mnu_IconContext.Add(Txt.Test, (*) => TestIcon())
 mnu_IconContext.Add() ; Separator
-mnu_IconContext.Add("Add to Favorites", (*) => AddToFavorites())
+mnu_IconContext.Add(Txt.AddToFavorites, (*) => AddToFavorites())
 mnu_IconContext.Add(Txt.Refresh, (*) => LoadIcons())
 mnu_IconContext.Add(Txt.SwitchView, (*) => SwitchView())
 
@@ -145,9 +147,9 @@ mnu_IconEmptyContext.Add(Txt.SwitchView, (*) => SwitchView())
 
 ; Right-click menu for File List
 mnu_FileContext := Menu()
-mnu_FileContext.Add(Txt.AddFile, (*) => AddCustomFile())
-mnu_FileContext.Add(Txt.RemoveFile, (*) => RemoveCustomFile())
-mnu_FileContext.Add(Txt.ClearList, (*) => ClearFileList())
+mnu_FileContext.Add(Txt.AddFile, (*) => AddCustomFile()) ; Always show Add option
+mnu_FileContext.Add(Txt.RemoveFile, (*) => RemoveCustomFile()) ; Show only if an item is selected, otherwise show Add and Clear options
+mnu_FileContext.Add(Txt.ClearList, (*) => ClearFileList()) ; Show context menu on right-click
 
 lv_Icons.OnEvent("ContextMenu", ShowContextMenu)
 lv_Icons.OnEvent("DoubleClick", CopyCurrentCode)
@@ -155,35 +157,39 @@ lv_Icons.OnEvent("ItemSelect", ShowPreview)
 
 lst_Files.OnEvent("ContextMenu", ShowFileContextMenu)
 
-; ========== RIGHT PANEL (x680-900) ==========
-lbl_Preview := mGui.AddText("x680 y10 w210", "🔍 Preview:")
-lbl_IconNo := mGui.AddText("x680 y35 w128 Center", "") ; Icon number text above picture
-pic_Preview := mGui.AddPicture("x680 y55 w128 h128 Border")
+; ========== RIGHT PANEL ==========
+lbl_Preview := mGui.AddText("x680 y10 w210", "🔍 Preview:") ; Preview label
+lbl_ExportSize := mGui.AddText("x680 y10 w40", "Size:") ; Size label
+ddl_ExportSize := mGui.AddDropDownList("x680 y8 w70", ["16", "24", "32", "48", "64", "128", "256"]) ; Export size drop-down list
+ddl_ExportSize.Text := ExportIconSize
+ddl_ExportSize.OnEvent("Change", OnExportSizeChange)
+lbl_IconNo := mGui.AddText("x680 y35 w256", "") ; Icon number text
+pic_Preview := mGui.AddPicture("x680 y55 w128 h128 Border") ; Icon preview picture
 
-btn_CopyImage := mGui.AddButton("x680 y190 w100 h30", Txt.Copy)
+btn_CopyImage := mGui.AddButton("x680 y190 w100 h30", Txt.Copy) ; Copy button
 btn_CopyImage.OnEvent("Click", (*) => CopyIconToClipboard())
 
-btn_SaveImage := mGui.AddButton("x+5 y190 w100 h30", Txt.Save)
+btn_SaveImage := mGui.AddButton("x+5 y190 w100 h30", Txt.Save) ; Save button
 btn_SaveImage.OnEvent("Click", (*) => SaveIconToFile())
 
-edt_IconCode := mGui.AddEdit("x680 y230 w210 h50", "")
+edt_IconCode := mGui.AddEdit("x680 y230 w210 h50", "") ; Icon code edit box
 
-btn_CopyCode := mGui.AddButton("x680 y285 w95 h30", Txt.CopyCode)
+btn_CopyCode := mGui.AddButton("x680 y285 w95 h30", Txt.CopyCode) ; Copy code button
 btn_CopyCode.OnEvent("Click", (*) => CopyCurrentCode())
 
-btn_Test := mGui.AddButton("x+5 y285 w95 h30", Txt.Test)
+btn_Test := mGui.AddButton("x+5 y285 w95 h30", Txt.Test) ; Test button
 btn_Test.OnEvent("Click", (*) => TestIcon())
 
 lbl_Favorites := mGui.AddText("x680 y330 w210", "⭐ Favorites:")
-lv_Favorites := mGui.AddListView("x680 y350 w210 h150 Grid -Multi", ["Icon", "Num", "File"])
+lv_Favorites := mGui.AddListView("x680 y350 w210 h150 Grid -Multi", ["Icon", "Num", "File"]) ; Favorites ListView
 lv_Favorites.ModifyCol(2, "Integer"), lv_Favorites.ModifyCol(3, 100)
 lv_Favorites.OnEvent("ItemSelect", ShowFavoritePreview)
 
-btn_FavAdd := mGui.AddButton("x680 y505 w65 h30", Txt.Add)
+btn_FavAdd := mGui.AddButton("x680 y505 w65 h30", Txt.Add) ; Add to favorites button
 btn_FavAdd.OnEvent("Click", AddToFavorites)
-btn_FavRemove := mGui.AddButton("x+5 y505 w65 h30", Txt.Remove)
+btn_FavRemove := mGui.AddButton("x+5 y505 w65 h30", Txt.Remove) ; Remove from favorites button
 btn_FavRemove.OnEvent("Click", RemoveFromFavorites)
-btn_FavClear := mGui.AddButton("x+5 y505 w65 h30", Txt.Clear)
+btn_FavClear := mGui.AddButton("x+5 y505 w65 h30", Txt.Clear) ; Clear favorites button
 btn_FavClear.OnEvent("Click", ClearFavorites)
 
 ; ========== BOTTOM PANEL ==========
@@ -216,8 +222,8 @@ DefaultDllFiles := [
 ]
 
 ; Fill DLL list
-InitializeDllList()
-LoadFavorites()
+InitializeDllList() ; Load saved files or defaults into the left panel list
+LoadFavorites() ; Load favorites from file
 Gdip.Startup() ; Initialize GDI+
 OnMessage(0x0100, OnLvKeyDown) ; Handle arrow keys for linear navigation in ListView
 
@@ -228,7 +234,7 @@ lst_Files.OnEvent("Change", LoadIcons)
 mGui.OnEvent("Close", (*) => CloseApplication())
 mGui.OnEvent("Size", GuiSize)
 mGui.OnEvent("DropFiles", OnDropFiles)
-mGui.Show()
+mGui.Show("w950 h670")
 return
 
 ; ========== FUNCTIONS ==========
@@ -287,9 +293,6 @@ LoadIcons(*) {
 
 	lbl_Status.Text := "⏳ Loading icons: " . CurrentDllPath . " "
 
-	; --- DYNAMIC ICON COUNTING ---
-	; Call Windows API to get the total number of icons in the file
-	; Passing 0 to pHicon and pIconId returns only the icon count
 	iconCountTotal := DllCall("User32.dll\PrivateExtractIconsW",
 		"Str", CurrentDllPath,
 		"Int", 0, "Int", 0, "Int", 0,
@@ -320,7 +323,7 @@ LoadIcons(*) {
 			continue
 
 		iconLoadedCount++
-		lv_Icons.Add("Icon" . iconLoadedCount, iconIndex) ; Add directly to ListView
+		lv_Icons.Add("Icon" . hSmall, iconIndex) ; Add directly to ListView
 
 		; Update status bar progress every 20 icons for better UI responsiveness
 		if (Mod(iconLoadedCount, 20) = 0) {
@@ -355,7 +358,7 @@ ShowPreview(*) {
 
 ; Update the entire preview pane (image, labels, code) based on an icon
 UpdatePreviewPane(iconPath, iconNum) {
-	global pic_Preview, lbl_IconNo, edt_IconCode, PreviewIcon
+	global pic_Preview, lbl_IconNo, edt_IconCode, PreviewIcon, ExportIconSize
 
 	if (iconPath = "" || iconNum = 0) {
 		pic_Preview.Value := ""
@@ -369,7 +372,7 @@ UpdatePreviewPane(iconPath, iconNum) {
 	PreviewIcon := { Path: iconPath, Num: iconNum }
 
 	; Update GUI
-	try pic_Preview.Value := "*Icon" iconNum " *w128 *h128 " iconPath
+	try pic_Preview.Value := "*Icon" iconNum " *w" ExportIconSize " *h" ExportIconSize " " iconPath
 	catch {
 		pic_Preview.Value := ""
 	}
@@ -424,71 +427,57 @@ CopyCurrentCode(*) {
 	ShowTempTooltip("📋 Code copied!")
 }
 
-; Copy icon image to clipboard
-CopyIconToClipboard(*) {
-	global lbl_Status, PreviewIcon
+; copies picture as png to clipboard with alpha-channel
+CopyIconToClipboard() {
+	global lbl_Status, PreviewIcon, ExportIconSize
 
 	if (PreviewIcon.Path = "") {
 		ShowTempTooltip("⚠️ Select an icon first!")
 		return
 	}
 
-	iconPath := PreviewIcon.Path
-	iconNum := PreviewIcon.Num
-
 	try {
-		; Load icon as HICON
-		hIcon := LoadPicture(iconPath, "Icon" iconNum " w128 h128", &imageType)
+		iconNum := PreviewIcon.Num - 1
+		hIcon := 0
 
-		if (!hIcon) {
-			ShowTempTooltip("❌ Failed to load icon!")
-			return
-		}
+		DllCall("PrivateExtractIcons", "Str", PreviewIcon.Path, "Int", iconNum,
+			"Int", ExportIconSize, "Int", ExportIconSize, "Ptr*", &hIcon, "Ptr", 0, "UInt", 1, "UInt", 0)
 
-		; Create a device context
-		hdc := DllCall("GetDC", "Ptr", 0, "Ptr")
-		hdcMem := DllCall("CreateCompatibleDC", "Ptr", hdc, "Ptr")
+		if (!hIcon)
+			throw Error("Failed to extract icon")
 
-		; Create a bitmap
-		hBitmap := DllCall("CreateCompatibleBitmap", "Ptr", hdc, "Int", 128, "Int", 128, "Ptr")
-		hOldBitmap := DllCall("SelectObject", "Ptr", hdcMem, "Ptr", hBitmap, "Ptr")
+		pBitmap := 0
+		DllCall("gdiplus\GdipCreateBitmapFromHICON", "Ptr", hIcon, "Ptr*", &pBitmap)
 
-		; Fill background with white
-		hBrush := DllCall("CreateSolidBrush", "UInt", 0xFFFFFF, "Ptr")
-		DllCall("FillRect", "Ptr", hdcMem, "Ptr", Buffer(16, 0), "Ptr", hBrush)
-		DllCall("DeleteObject", "Ptr", hBrush)
+		clsid := Buffer(16)
+		DllCall("ole32\CLSIDFromString", "WStr", "{557CF406-1A04-11D3-9A73-0000F81EF32E}", "Ptr", clsid)
 
-		; Draw icon on bitmap
-		DllCall("DrawIconEx", "Ptr", hdcMem, "Int", 0, "Int", 0, "Ptr", hIcon, "Int", 128, "Int", 128, "UInt", 0, "Ptr",
-			0, "UInt", 0x0003) ; DI_NORMAL
+		DllCall("ole32\CreateStreamOnHGlobal", "Ptr", 0, "Int", true, "Ptr*", &pStream := 0)
+		DllCall("gdiplus\GdipSaveImageToStream", "Ptr", pBitmap, "Ptr", pStream, "Ptr", clsid, "Ptr", 0)
 
-		; Cleanup
-		DllCall("SelectObject", "Ptr", hdcMem, "Ptr", hOldBitmap)
-		DllCall("DeleteDC", "Ptr", hdcMem)
-		DllCall("ReleaseDC", "Ptr", 0, "Ptr", hdc)
-		DllCall("DestroyIcon", "Ptr", hIcon)
+		DllCall("ole32\GetHGlobalFromStream", "Ptr", pStream, "Ptr*", &hMem := 0)
 
-		; Open clipboard and set bitmap
-		if (DllCall("OpenClipboard", "Ptr", 0)) {
-			DllCall("EmptyClipboard")
-			DllCall("SetClipboardData", "UInt", 2, "Ptr", hBitmap) ; CF_BITMAP = 2
-			DllCall("CloseClipboard")
-
-			ShowTempTooltip("✅ Icon copied to clipboard!")
-			lbl_Status.Text := "📋 Icon image copied to clipboard"
-		} else {
-			DllCall("DeleteObject", "Ptr", hBitmap)
-			ShowTempTooltip("❌ Failed to open clipboard!")
-		}
-
-	} catch as err {
-		ShowTempTooltip("❌ Error: " err.Message, 2000)
+		fmtPNG := DllCall("RegisterClipboardFormat", "Str", "PNG", "UInt")
+		DllCall("OpenClipboard", "Ptr", 0)
+		DllCall("EmptyClipboard")
+		DllCall("SetClipboardData", "UInt", fmtPNG, "Ptr", hMem)
+		DllCall("CloseClipboard")
 	}
+	finally {
+		if (pBitmap)
+			DllCall("gdiplus\GdipDisposeImage", "Ptr", pBitmap)
+		if (hIcon)
+			DllCall("DestroyIcon", "Ptr", hIcon)
+
+	}
+
+	lbl_Status.Text := "📋 Icon copied to clipboard!"
+	ShowTempTooltip("📋 Icon copied!")
 }
 
 ; Save current icon to file
 SaveIconToFile(*) {
-	global lbl_Status, PreviewIcon, mGui
+	global lbl_Status, PreviewIcon, mGui, ExportIconSize
 
 	if (PreviewIcon.Path = "") {
 		ShowTempTooltip("⚠️ Select an icon first!")
@@ -500,32 +489,41 @@ SaveIconToFile(*) {
 
 	SplitPath(iconPath, &fileName)
 	safeFileName := StrReplace(fileName, ".", "_")
-	defaultSaveName := safeFileName "_Icon_" iconNum ; ".ico"
+	defaultSaveName := safeFileName "_Icon_" iconNum
+
+	; SaveFile(Owner, Title, Filter, DefaultFileName, Options)
 	saved := SaveFile([mGui.Hwnd, "Save Icon"]
 		, defaultSaveName
-		, { ICO: "*.ico`n", PNG: "*.png", BMP: "*.bmp", JPEG: "*.jpg" }
+		, { PNG: "*.png`n", BMP: "*.bmp", JPEG: "*.jpg", ICO: "*.ico" }
 		, ""
-		, 2)
+		, 0x6)
 
 	if !saved
 		return
 	savePath := saved.FileFullPath
 
 	try {
-		hIcon := LoadPicture(iconPath, "Icon" iconNum " w128 h128", &imageType)
-		if (!hIcon)
-			throw Error("Failed to load icon")
+		; Extract icon as HICON with alpha via PrivateExtractIcons
+		iconIndex := iconNum - 1 ; PrivateExtractIcons is zero-based
+		hIcon := 0
+		DllCall("PrivateExtractIcons", "Str", iconPath, "Int", iconIndex,
+			"Int", ExportIconSize, "Int", ExportIconSize, "Ptr*", &hIcon, "Ptr", 0, "UInt", 1, "UInt", 0)
 
-		Gdip.SaveHICONToFile(hIcon, savePath) ; Use GDI+ to save the icon in the correct format based on file extension
-		DllCall("DestroyIcon", "Ptr", hIcon)
+		if (!hIcon)
+			throw Error("Failed to extract icon")
+
+		; Save via GDI+ (keeps alpha)
+		Gdip.SaveHICONToFile(hIcon, savePath)
 
 		lbl_Status.Text := "✅ Saved: " savePath
 		ShowTempTooltip("✅ Icon saved!")
 	} catch as err {
 		MsgBox("Error saving image: " err.Message, "Error", "Icon!")
+	} finally {
+		if (hIcon)
+			DllCall("DestroyIcon", "Ptr", hIcon)
 	}
 }
-
 ; Show context menu on right-click
 ShowContextMenu(LV, Item, IsRightClick, X, Y) {
 	if !IsRightClick ; No right-click
@@ -613,6 +611,7 @@ AddToFavorites(*) {
 	ShowTempTooltip("⭐ Added to favorites!")
 }
 
+; Remove selected icon from favorites
 RemoveFromFavorites(*) {
 	global lv_Favorites, FavoriteIcons, FavoritesListChanged
 
@@ -629,6 +628,7 @@ RemoveFromFavorites(*) {
 	ShowTempTooltip("➖ Favorite removed.")
 }
 
+; Clear all favorites
 ClearFavorites(*) {
 	global lv_Favorites, FavoriteIcons, IL_Favorites, lbl_Status, FavoritesListChanged
 
@@ -870,25 +870,55 @@ GuiSize(GuiObj, MinMax, Width, Height) {
 
 	global mGui, lst_Files, lv_Icons, lbl_Status, CurrentViewMode, pic_Preview, lbl_IconNo, edt_IconCode, lbl_Preview,
 		btn_CopyImage, btn_SaveImage, btn_CopyCode, btn_Test, btn_Switch, lv_Favorites, btn_FavAdd, btn_FavRemove,
-		lbl_Favorites, btn_FavClear
+		lbl_Favorites, btn_FavClear, lbl_ExportSize, ddl_ExportSize, ExportIconSize, LastGuiW, LastGuiH
 
-	GuiRedraw(GuiObj, 0) ; Disable redraw to prevent flickering
+	LastGuiW := Width
+	LastGuiH := Height
+
+	GuiRedraw(GuiObj, 0)
 
 	; Left panel
 	lst_Files.Move(, , , Height - 110)
 
 	; Right Panel
 	rightPanelWidth := 210
+	if (ExportIconSize + 20 > rightPanelWidth)
+		rightPanelWidth := ExportIconSize + 20
 	rightPanelX := Width - rightPanelWidth - 10
-	lbl_Preview.Move(rightPanelX), lbl_IconNo.Move(rightPanelX), pic_Preview.Move(rightPanelX)
-	btn_CopyImage.Move(rightPanelX), btn_SaveImage.Move(rightPanelX + 105)
-	edt_IconCode.Move(rightPanelX, 230, rightPanelWidth)
-	btn_CopyCode.Move(rightPanelX), btn_Test.Move(rightPanelX + 105)
-	lbl_Favorites.Move(rightPanelX, 330)
+
+	sizeComboW := 70
+	sizeLabelW := 35
+	sizeComboX := rightPanelX + rightPanelWidth - sizeComboW
+	sizeLabelX := sizeComboX - sizeLabelW - 5
+
+	lbl_Preview.Move(rightPanelX, 10, sizeLabelX - rightPanelX - 5)
+	lbl_ExportSize.Move(sizeLabelX, 10, sizeLabelW)
+	ddl_ExportSize.Move(sizeComboX, 8, sizeComboW)
+
+	lbl_IconNo.Move(rightPanelX, 35)
+	pic_Preview.Move(rightPanelX, 55, ExportIconSize, ExportIconSize)
+
+	previewBottom := 55 + ExportIconSize
+	buttonsY := previewBottom + 7
+	btn_CopyImage.Move(rightPanelX, buttonsY)
+	btn_SaveImage.Move(rightPanelX + 105, buttonsY)
+
+	iconCodeY := buttonsY + 40
+	edt_IconCode.Move(rightPanelX, iconCodeY, rightPanelWidth, 50)
+
+	copyCodeY := iconCodeY + 55
+	btn_CopyCode.Move(rightPanelX, copyCodeY)
+	btn_Test.Move(rightPanelX + 105, copyCodeY)
+
+	favoritesLabelY := copyCodeY + 45
+	lbl_Favorites.Move(rightPanelX, favoritesLabelY)
 
 	favButtonsY := Height - 70
-	favListHeight := favButtonsY - 350 - 5
-	lv_Favorites.Move(rightPanelX, 350, rightPanelWidth, favListHeight)
+	favoritesListY := favoritesLabelY + 20
+	favListHeight := favButtonsY - favoritesListY - 5
+	if (favListHeight < 0)
+		favListHeight := 0
+	lv_Favorites.Move(rightPanelX, favoritesListY, rightPanelWidth, favListHeight)
 	lv_Favorites.ModifyCol(3, rightPanelWidth - 38 - 50 - 10)
 
 	btnWidth := 65
@@ -926,11 +956,25 @@ GuiRedraw(GuiObj, redraw) {
 
 ; ========== HELPER FUNCTIONS ==========
 
-
 ; Show a tooltip for a short duration
 ShowTempTooltip(message, duration := 1500) {
 	ToolTip(message, , , 1)
 	SetTimer(() => ToolTip(, , , 1), -duration)
+}
+
+OnExportSizeChange(*) {
+	global ddl_ExportSize, ExportIconSize, LastGuiW, LastGuiH, mGui, PreviewIcon
+
+	size := Integer(ddl_ExportSize.Text)
+	if (size < 16)
+		size := 16
+	ExportIconSize := size
+
+	if (LastGuiW > 0 && LastGuiH > 0)
+		GuiSize(mGui, 0, LastGuiW, LastGuiH)
+
+	if (PreviewIcon.Path != "")
+		UpdatePreviewPane(PreviewIcon.Path, PreviewIcon.Num)
 }
 
 ; Handle arrow key navigation in ListView
