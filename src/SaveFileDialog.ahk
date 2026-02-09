@@ -88,11 +88,16 @@ SaveFile(Owner, FileName := "", Filter := "", CustomPlaces := "", Options := 0x6
 	FilterSpec := Buffer(2 * FilterCount * A_PtrSize)
 	FileTypeIndex := 1
 	Index := 1
+	FirstFilter := ""
+	DefaultExt := ""
 
 	for Description, FileTypes in Filter.OwnProps() {
 		; Determine default filter (if `n character exists)
+		if (Index = 1)
+			FirstFilter := FileTypes
 		if InStr(FileTypes, "`n") {
 			FileTypeIndex := Index
+			DefaultExt := _GetFirstFilterExt(FileTypes)
 		}
 
 		; Convert description and file types to UTF-16
@@ -113,11 +118,18 @@ SaveFile(Owner, FileName := "", Filter := "", CustomPlaces := "", Options := 0x6
 		Index++
 	}
 
+	if (DefaultExt = "" && FirstFilter != "")
+		DefaultExt := _GetFirstFilterExt(FirstFilter)
+
 	; Assign filters to dialog
 	DllCall(NumGet(NumGet(IFileSaveDialog.Ptr, "Ptr") + 4 * A_PtrSize, "Ptr"), "Ptr", IFileSaveDialog, "UInt", FilterCount, "Ptr", FilterSpec)
 
 	; Set default filter index
 	DllCall(NumGet(NumGet(IFileSaveDialog.Ptr, "Ptr") + 5 * A_PtrSize, "Ptr"), "Ptr", IFileSaveDialog, "UInt", FileTypeIndex)
+
+	; Set default extension so the dialog appends it before returning
+	if (DefaultExt != "")
+		DllCall(NumGet(NumGet(IFileSaveDialog.Ptr, "Ptr") + 22 * A_PtrSize, "Ptr"), "Ptr", IFileSaveDialog, "WStr", DefaultExt)
 
 	; ==================== ADD CUSTOM PLACES ====================
 	if IsObject(CustomPlaces) || CustomPlaces == "" {
@@ -163,34 +175,7 @@ SaveFile(Owner, FileName := "", Filter := "", CustomPlaces := "", Options := 0x6
 			Result := StrGet(ResultBuf, "UTF-16")
 			Obj[IShellItem] := PIDL
 
-			; ==================== AUTOMATIC EXTENSION ADDING ====================
-			; If file has no extension, add based on selected filter
-			SplitPath Result, , , &Ext
-			if (Ext == "") {
-				; Find selected filter
-				CurrentIndex := 1
-				for Description, FileTypes in Filter.OwnProps() {
-					if (CurrentIndex == FileTypeIndex) {
-						; Get first extension from filter (*.txt -> txt)
-						FilterExt := Trim(StrReplace(FileTypes, "`n"))
-						; Get first one if multiple extensions (*.doc;*.docx -> *.doc)
-						if InStr(FilterExt, ";") {
-							FilterExt := SubStr(FilterExt, 1, InStr(FilterExt, ";") - 1)
-						}
-						; Remove *. and get only extension
-						FilterExt := StrReplace(FilterExt, "*.")
-						FilterExt := StrReplace(FilterExt, "*")
-						FilterExt := Trim(FilterExt)
-
-						; Add if valid extension exists
-						if (FilterExt != "" && FilterExt != ".*") {
-							Result .= "." . FilterExt
-						}
-						break
-					}
-					CurrentIndex++
-				}
-			}
+			; Extension is now handled by the dialog via SetDefaultExtension.
 		}
 	}
 
@@ -204,4 +189,15 @@ SaveFile(Owner, FileName := "", Filter := "", CustomPlaces := "", Options := 0x6
 
 	; Return result
 	return Result ? { FileFullPath: Result, FilterIndex: FileTypeIndex } : false
+}
+
+_GetFirstFilterExt(fileTypes) {
+	types := Trim(StrReplace(fileTypes, "`n"))
+	if InStr(types, ";")
+		types := SubStr(types, 1, InStr(types, ";") - 1)
+	types := Trim(types)
+	types := StrReplace(types, "*.")
+	types := StrReplace(types, "*")
+	types := Trim(types)
+	return (types = "" || types = ".*") ? "" : types
 }
