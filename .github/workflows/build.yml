@@ -1,0 +1,45 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Kodları Çek (Checkout)
+        uses: actions/checkout@v4
+
+      - name: 64-bit Derle (Compile x64 - AHK v2)
+        uses: Nekosina/github-action-ahk2exe@v1.2.3
+        with:
+          ahk-version: 'v2.0.20'          # AHK v2 sürümünü kullan
+          in: 'src/AS Icon Viewer.ahk'    # Ana dosya yolu (src içinde)
+          out: 'AS.Icon.Viewer_x64.exe'   # Çıktı adı
+          icon: 'src/app_icon.ico'        # İkon dosyası yolu
+          base: 'AutoHotkey64.exe'        # v2 için 64-bit base dosya
+          compress: 'true'                # (İsteğe bağlı) Dosya boyutunu küçültür (UPX)
+
+      - name: 32-bit Derle (Compile x32 - AHK v2)
+        uses: Nekosina/github-action-ahk2exe@v1.2.3
+        with:
+          ahk-version: 'v2.0.20'
+          in: 'src/AS Icon Viewer.ahk'
+          out: 'AS.Icon.Viewer_x32.exe'
+          icon: 'src/app_icon.ico'
+          base: 'AutoHotkey32.exe'        # v2 için 32-bit base dosya
+          compress: 'true'
+
+      - name: Release Oluştur ve Dosyaları Yükle
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            AS-Icon-Viewer-x64.exe
+            AS-Icon-Viewer-x32.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
