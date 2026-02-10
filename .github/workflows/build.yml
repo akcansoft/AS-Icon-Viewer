@@ -36,40 +36,38 @@ jobs:
       - name: Derleme İşlemi (x64 ve x32)
         shell: pwsh
         run: |
-          # Ahk2Exe
           $compiler = "ahk\Ahk2Exe.exe"
           if (!(Test-Path $compiler)) {
               Write-Error "Ahk2Exe.exe bulunamadı"
               exit 1
           }
-
-          # AutoHotkey exe'ler (ZIP içeriğine birebir)
+      
           $ahk64 = "ahk\AutoHotkey64.exe"
           $ahk32 = "ahk\AutoHotkey32.exe"
-
+      
           if (!(Test-Path $ahk64) -or !(Test-Path $ahk32)) {
               Write-Error "AutoHotkey32/64.exe bulunamadı"
               exit 1
           }
-
-          # Script
+      
           $script = "src/AS Icon Viewer.ahk"
           if (!(Test-Path $script)) {
               Write-Error "AHK script bulunamadı"
               exit 1
           }
-
-          # Ahk2Exe exe'yi script klasörüne üretir
-          $outDir = "src"
-          $exeName = "AS Icon Viewer.exe"
-
+      
           # x64
-          & "$compiler" /in "$script" /base "$ahk64"
-          Move-Item "$outDir\$exeName" "AS-Icon-Viewer-x64.exe" -Force
-
+          & "$compiler" `
+            /in "$script" `
+            /base "$ahk64" `
+            /out "AS-Icon-Viewer-x64.exe"
+      
           # x32
-          & "$compiler" /in "$script" /base "$ahk32"
-          Move-Item "$outDir\$exeName" "AS-Icon-Viewer-x32.exe" -Force
+          & "$compiler" `
+            /in "$script" `
+            /base "$ahk32" `
+            /out "AS-Icon-Viewer-x32.exe"
+
 
       # 4) Release oluştur
       - name: Release Oluştur
