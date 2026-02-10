@@ -15,44 +15,36 @@ jobs:
       - name: Kodları Çek
         uses: actions/checkout@v4
 
-      - name: Dosya Kontrolü (Hata Ayıklama)
+      - name: Bağımlılıkları İndir (v2.0.20 ve Ahk2Exe)
         shell: pwsh
         run: |
-          Write-Host "Mevcut dosyalar listeleniyor..."
-          ls -Recurse
-          if (!(Test-Path "src/AS Icon Viewer.ahk")) { 
-            Write-Error "HATA: 'src/AS Icon Viewer.ahk' bulunamadı! Lütfen klasör adını ve boşlukları kontrol edin."
-            exit 1 
-          }
-
-      - name: AutoHotkey v2 ve Derleyiciyi Kur
-        shell: pwsh
-        run: |
-          # AHK v2 ve Derleyiciyi indir
-          Invoke-WebRequest -Uri "https://www.autohotkey.com/download/ahk-v2.zip" -OutFile "ahk.zip"
-          Invoke-WebRequest -Uri "https://www.autohotkey.com/download/ahk2exe.zip" -OutFile "compiler.zip"
+          # Ahk2Exe (Verdiğiniz özel link)
+          Invoke-WebRequest -Uri "https://github.com/AutoHotkey/Ahk2Exe/releases/download/Ahk2Exe1.1.37.02a0a/Ahk2Exe1.1.37.02a0.zip" -OutFile "compiler.zip"
           
-          # Klasörlere çıkar
+          # AutoHotkey v2.0.20 (Resmi GitHub Release)
+          Invoke-WebRequest -Uri "https://github.com/AutoHotkey/AutoHotkey/releases/download/v2.0.20/AutoHotkey_2.0.20.zip" -OutFile "ahk.zip"
+          
+          # Dosyaları Çıkar
           Expand-Archive -Path "ahk.zip" -DestinationPath "ahk_dir"
-          Expand-Archive -Path "compiler.zip" -DestinationPath "compiler_dir"
+          # Ahk2Exe zip'i sadece exe içerdiği için doğrudan ahk_dir içine çıkaralım, böylece yan yana olurlar
+          Expand-Archive -Path "compiler.zip" -DestinationPath "ahk_dir"
 
       - name: Derleme İşlemi (x64 ve x32)
         shell: pwsh
         run: |
-          # Tırnak işaretlerini garantileyerek çalıştırıyoruz
-          $compiler = ".\compiler_dir\Ahk2Exe.exe"
-          $script = "src/AS Icon Viewer.ahk"
-          $icon = "src/app_icon.ico"
+          # Tüm dosyalar artık ahk_dir içinde toplandı
+          $compiler = ".\ahk_dir\Ahk2Exe.exe"
+          $script = "AS Icon Viewer.ahk"
+          $icon = "app_icon.ico"
           
           # 64-bit Derle
-          & $compiler /in "$script" /out "AS-Icon-Viewer-x64.exe" /icon "$icon" /base "ahk_dir/v2/AutoHotkey64.exe"
+          & $compiler /in "$script" /out "AS-Icon-Viewer-x64.exe" /icon "$icon" /base ".\ahk_dir\AutoHotkey64.exe"
           
           # 32-bit Derle
-          & $compiler /in "$script" /out "AS-Icon-Viewer-x32.exe" /icon "$icon" /base "ahk_dir/v2/AutoHotkey32.exe"
+          & $compiler /in "$script" /out "AS-Icon-Viewer-x32.exe" /icon "$icon" /base ".\ahk_dir\AutoHotkey32.exe"
 
       - name: Release Oluştur ve Yükle
         uses: softprops/action-gh-release@v2
-        if: success()
         with:
           files: |
             AS-Icon-Viewer-x64.exe
