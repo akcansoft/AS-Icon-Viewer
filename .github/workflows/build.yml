@@ -53,7 +53,7 @@ jobs:
           }
 
           # Script yolu
-          $script = "AS-Icon-Viewer/src/AS Icon Viewer.ahk"
+          $script = "src/AS Icon Viewer.ahk"
           if (!(Test-Path $script)) {
               Write-Error "AHK script bulunamadı"
               exit 1
