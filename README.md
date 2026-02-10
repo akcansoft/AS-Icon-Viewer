@@ -3,7 +3,7 @@
 [![AutoHotkey](https://img.shields.io/badge/Language-AutoHotkey_v2-green.svg)](https://www.autohotkey.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows-blue.svg)](https://www.microsoft.com/windows)
 [![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.2-brightgreen.svg)](https://github.com/akcansoft/AS-Icon-Viewer/releases)
+[![Version](https://img.shields.io/badge/Version-1.3-brightgreen.svg)](https://github.com/akcansoft/AS-Icon-Viewer/releases)
 
 ![GitHub stars](https://img.shields.io/github/stars/akcansoft/AS-Icon-Viewer?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/akcansoft/AS-Icon-Viewer?style=social)
@@ -15,12 +15,29 @@
 
 ![AS Icon Viewer Screenshot](docs/screen-shot-1.png)
 
-## 🆕 What's New (v1.2)
+## 🆕 What's New (v1.3)
 
+- **Direct View Switching:** Replaced the "Switch View" cycle button with a direct DropDownList for instant access to any view mode.
+- **Advanced 3-Panel StatusBar:** New native status bar showing operation status, icon counts, and active file paths in separate segments.
+- **File Location Explorer:** Added "Open File Location" to the file list context menu to quickly find source files in Windows Explorer.
+- **Multi-Select Support:** Enabled multiple file and favorite selection, allowing for bulk removal and more efficient list management.
+- **Recursive Layout Consistency:** Realigned all control buttons (Add/Remove/Clear) to be positioned above their respective lists, creating a unified and professional visual flow.
+- **Internal Optimization:** Unified file processing logic for both manual selection and Drag & Drop, with improved `.lnk` shortcut resolution.
+- **Redesigned Symbols:** Modernized notification system using a centralized Symbol object for consistent visual feedback (info, success, warnings).
+- **Refined Menu System:** Reorganized Menu Bar with intuitive access keys (Alt hotkeys) and clearer menu structures.
+
+## 📜 Version History
+
+### v1.2 : 09/02/2026
 - **Export Size Selector:** Choose 16–256px sizes for preview and saved icons
 - **Better Transparency:** Clipboard copy now uses PNG with alpha
 - **Improved Exports:** Higher-quality alpha handling and cleaner ICO output
 - **Smarter Save Dialog:** File extension follows the selected file type
+
+### v1.1 : 07/02/2026
+
+### v1.0 : 05/02/2026
+- First Release
 
 ## ✨ Key Features
 
@@ -115,7 +132,7 @@
 - **Add to Favorites:** Click **➕ Add** in the favorites section
 
 ### View Modes
-- Click **Switch View** or use **View → Switch View** to cycle through:
+- Use the **DropDownList** next to the Icons label or the **Icon View** menu to select:
   1. Small Report View
   2. Large Report View
   3. Small Icon View
@@ -128,7 +145,11 @@
   - Copy Code
   - Test Icon
   - Add to Favorites
-  - Refresh/Switch View
+  - Refresh List
+- **Right-click on file list** for:
+  - Open File Location
+  - Add/Remove File
+  - Clear List
 
 ## 🎮 Interface Overview
 
