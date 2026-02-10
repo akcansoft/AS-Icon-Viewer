@@ -29,36 +29,49 @@ jobs:
             -Uri "https://github.com/AutoHotkey/Ahk2Exe/releases/download/Ahk2Exe1.1.37.02a0a/Ahk2Exe1.1.37.02a0.zip" `
             -OutFile "compiler.zip"
 
-          Expand-Archive ahk.zip -DestinationPath ahk_dir
-          Expand-Archive compiler.zip -DestinationPath ahk_dir
+          Expand-Archive ahk.zip -DestinationPath ahk
+          Expand-Archive compiler.zip -DestinationPath ahk
 
-      # 3) Derleme (x64 + x32)
-      - name: Derleme İşlemi
+      # 3) Derleme
+      - name: Derleme İşlemi (x64 ve x32)
         shell: pwsh
         run: |
-          $compiler = ".\ahk_dir\Compiler\Ahk2Exe.exe"
-      
-          $ahk64 = Get-ChildItem ahk_dir -Recurse -Filter AutoHotkey64.exe | Select-Object -First 1
-          $ahk32 = Get-ChildItem ahk_dir -Recurse -Filter AutoHotkey32.exe | Select-Object -First 1
-      
-          if (-not $ahk64 -or -not $ahk32) {
-              Write-Error "AutoHotkey exe bulunamadı"
+          # Ahk2Exe
+          $compiler = "ahk\Ahk2Exe.exe"
+          if (!(Test-Path $compiler)) {
+              Write-Error "Ahk2Exe.exe bulunamadı"
               exit 1
           }
-      
+
+          # AutoHotkey exe'ler (ZIP içeriğine birebir)
+          $ahk64 = "ahk\AutoHotkey64.exe"
+          $ahk32 = "ahk\AutoHotkey32.exe"
+
+          if (!(Test-Path $ahk64) -or !(Test-Path $ahk32)) {
+              Write-Error "AutoHotkey32/64.exe bulunamadı"
+              exit 1
+          }
+
+          # Script
           $script = "src/AS Icon Viewer.ahk"
+          if (!(Test-Path $script)) {
+              Write-Error "AHK script bulunamadı"
+              exit 1
+          }
+
+          # Ahk2Exe exe'yi script klasörüne üretir
           $outDir = "src"
           $exeName = "AS Icon Viewer.exe"
-      
+
           # x64
-          & $compiler /in "$script" /base "$($ahk64.FullName)"
+          & "$compiler" /in "$script" /base "$ahk64"
           Move-Item "$outDir\$exeName" "AS-Icon-Viewer-x64.exe" -Force
-      
+
           # x32
-          & $compiler /in "$script" /base "$($ahk32.FullName)"
+          & "$compiler" /in "$script" /base "$ahk32"
           Move-Item "$outDir\$exeName" "AS-Icon-Viewer-x32.exe" -Force
 
-      # 4) Release oluştur ve exe'leri ekle
+      # 4) Release oluştur
       - name: Release Oluştur
         uses: softprops/action-gh-release@v2
         with:
