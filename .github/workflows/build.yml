@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*'  # Örn: v1.0.1 etiketiyle push yapıldığında çalışır
+      - 'v*'
 
 jobs:
   build:
@@ -12,35 +12,36 @@ jobs:
       contents: write
 
     steps:
-      - name: Kodları Çek (Checkout)
-        uses: actions/checkout@v4 # Kararlılık için v4 önerilir ama v6.0.2 de yazabilirsiniz
+      - name: Kodları Çek
+        uses: actions/checkout@v4
 
-      - name: 64-bit Derle (v2)
-        uses: Nekosina/github-action-ahk2exe@v1.2.3
-        with:
-          ahk-version: 'v2.0.20'
-          in: 'src/AS Icon Viewer.ahk'
-          out: 'AS-Icon-Viewer-x64.exe'
-          icon: 'src/app_icon.ico'
-          base: 'AutoHotkey64.exe'
-          compress: 'true'
+      - name: AutoHotkey v2 ve Derleyiciyi Kur
+        shell: pwsh
+        run: |
+          # AHK v2.0.20 indir ve zipten çıkar
+          Invoke-WebRequest -Uri "https://www.autohotkey.com/download/ahk-v2.zip" -OutFile "ahk.zip"
+          Expand-Archive -Path "ahk.zip" -DestinationPath "ahk_dir"
+          
+          # Derleyiciyi (Ahk2Exe) indir
+          Invoke-WebRequest -Uri "https://www.autohotkey.com/download/ahk2exe.zip" -OutFile "compiler.zip"
+          Expand-Archive -Path "compiler.zip" -DestinationPath "compiler_dir"
 
-      - name: 32-bit Derle (v2)
-        uses: Nekosina/github-action-ahk2exe@v1.2.3
-        with:
-          ahk-version: 'v2.0.20'
-          in: 'src/AS Icon Viewer.ahk'
-          out: 'AS-Icon-Viewer-x32.exe'
-          icon: 'src/app_icon.ico'
-          base: 'AutoHotkey32.exe'
-          compress: 'true'
+      - name: 64-bit Derle (x64)
+        shell: pwsh
+        run: |
+          .\compiler_dir\Ahk2Exe.exe /in "src/AS Icon Viewer.ahk" /out "AS-Icon-Viewer-x64.exe" /icon "src/app_icon.ico" /base "ahk_dir/v2/AutoHotkey64.exe" /compress 1
+
+      - name: 32-bit Derle (x32)
+        shell: pwsh
+        run: |
+          .\compiler_dir\Ahk2Exe.exe /in "src/AS Icon Viewer.ahk" /out "AS-Icon-Viewer-x32.exe" /icon "src/app_icon.ico" /base "ahk_dir/v2/AutoHotkey32.exe" /compress 1
 
       - name: Release Oluştur ve Yükle
-        uses: softprops/action-gh-release@v2 # Bu da güncellendi
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             AS-Icon-Viewer-x64.exe
             AS-Icon-Viewer-x32.exe
-          generate_release_notes: true # Otomatik değişim günlüğü oluşturur
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
