@@ -96,8 +96,8 @@
 
 ### Option 1: Download Compiled Executable (Recommended)
 1. Download the latest release from [Releases](https://github.com/akcansoft/AS-Icon-Viewer/releases)
-   - `AS Icon Viewer_x64.exe` for 64-bit Windows
-   - `AS Icon Viewer_x32.exe` for 32-bit Windows
+   - `AS.Icon.Viewer_x64.exe` for 64-bit Windows
+   - `AS.Icon.Viewer_x32.exe` for 32-bit Windows
 2. Run the executable - no installation required!
 
 ### Option 2: Run from Source
