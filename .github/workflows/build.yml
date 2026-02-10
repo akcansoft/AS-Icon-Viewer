@@ -18,30 +18,30 @@ jobs:
       - name: Bağımlılıkları İndir (v2.0.20 ve Ahk2Exe)
         shell: pwsh
         run: |
-          # Ahk2Exe (Verdiğiniz özel link)
+          # Ahk2Exe ve AutoHotkey v2.0.20 resmi GitHub kaynaklarından indirilir
           Invoke-WebRequest -Uri "https://github.com/AutoHotkey/Ahk2Exe/releases/download/Ahk2Exe1.1.37.02a0a/Ahk2Exe1.1.37.02a0.zip" -OutFile "compiler.zip"
-          
-          # AutoHotkey v2.0.20 (Resmi GitHub Release)
           Invoke-WebRequest -Uri "https://github.com/AutoHotkey/AutoHotkey/releases/download/v2.0.20/AutoHotkey_2.0.20.zip" -OutFile "ahk.zip"
           
-          # Dosyaları Çıkar
+          # Klasörlere çıkar
           Expand-Archive -Path "ahk.zip" -DestinationPath "ahk_dir"
-          # Ahk2Exe zip'i sadece exe içerdiği için doğrudan ahk_dir içine çıkaralım, böylece yan yana olurlar
           Expand-Archive -Path "compiler.zip" -DestinationPath "ahk_dir"
 
       - name: Derleme İşlemi (x64 ve x32)
         shell: pwsh
         run: |
-          # Tüm dosyalar artık ahk_dir içinde toplandı
           $compiler = ".\ahk_dir\Ahk2Exe.exe"
           $script = "AS Icon Viewer.ahk"
-          $icon = "app_icon.ico"
           
           # 64-bit Derle
-          & $compiler /in "$script" /out "AS-Icon-Viewer-x64.exe" /icon "$icon" /base ".\ahk_dir\AutoHotkey64.exe"
+          # AHK dosyanızdaki ;@Ahk2Exe-ExeName direktifi nedeniyle dosya "AS Icon Viewer.exe" olarak oluşur
+          & $compiler /in "$script" /base ".\ahk_dir\AutoHotkey64.exe"
+          # Karışıklığı önlemek için ismi x64 olarak değiştiriyoruz
+          Move-Item "AS Icon Viewer.exe" "AS-Icon-Viewer-x64.exe" -Force
           
           # 32-bit Derle
-          & $compiler /in "$script" /out "AS-Icon-Viewer-x32.exe" /icon "$icon" /base ".\ahk_dir\AutoHotkey32.exe"
+          & $compiler /in "$script" /base ".\ahk_dir\AutoHotkey32.exe"
+          # İsmi x32 olarak değiştiriyoruz
+          Move-Item "AS Icon Viewer.exe" "AS-Icon-Viewer-x32.exe" -Force
 
       - name: Release Oluştur ve Yükle
         uses: softprops/action-gh-release@v2
