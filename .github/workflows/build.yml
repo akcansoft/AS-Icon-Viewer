@@ -36,36 +36,27 @@ jobs:
       - name: Derleme İşlemi
         shell: pwsh
         run: |
-          # Ahk2Exe yolu
-          $compiler = ".\ahk_dir\Ahk2Exe.exe"
-          if (!(Test-Path $compiler)) {
-              Write-Error "Ahk2Exe.exe bulunamadı"
-              exit 1
-          }
-
-          # AutoHotkey exe'lerini bul
+          $compiler = ".\ahk_dir\Compiler\Ahk2Exe.exe"
+      
           $ahk64 = Get-ChildItem ahk_dir -Recurse -Filter AutoHotkey64.exe | Select-Object -First 1
           $ahk32 = Get-ChildItem ahk_dir -Recurse -Filter AutoHotkey32.exe | Select-Object -First 1
-
+      
           if (-not $ahk64 -or -not $ahk32) {
-              Write-Error "AutoHotkey 32/64 exe bulunamadı"
+              Write-Error "AutoHotkey exe bulunamadı"
               exit 1
           }
-
-          # Script yolu
+      
           $script = "src/AS Icon Viewer.ahk"
-          if (!(Test-Path $script)) {
-              Write-Error "AHK script bulunamadı"
-              exit 1
-          }
-
-          # x64 derle
+          $outDir = "src"
+          $exeName = "AS Icon Viewer.exe"
+      
+          # x64
           & $compiler /in "$script" /base "$($ahk64.FullName)"
-          Move-Item "AS Icon Viewer.exe" "AS-Icon-Viewer-x64.exe" -Force
-
-          # x32 derle
+          Move-Item "$outDir\$exeName" "AS-Icon-Viewer-x64.exe" -Force
+      
+          # x32
           & $compiler /in "$script" /base "$($ahk32.FullName)"
-          Move-Item "AS Icon Viewer.exe" "AS-Icon-Viewer-x32.exe" -Force
+          Move-Item "$outDir\$exeName" "AS-Icon-Viewer-x32.exe" -Force
 
       # 4) Release oluştur ve exe'leri ekle
       - name: Release Oluştur
