@@ -8,16 +8,15 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     permissions:
       contents: write
 
     steps:
-      # 1) Repo'yu çek
+      # 1) Repo'yu çek ---------------------------------------------
       - name: Kodları Çek
         uses: actions/checkout@v4
 
-      # 2) AutoHotkey v2.0.20 + Ahk2Exe indir
+      # 2) AutoHotkey + Ahk2Exe indir -------------------------------
       - name: Bağımlılıkları İndir
         shell: pwsh
         run: |
@@ -32,44 +31,50 @@ jobs:
           Expand-Archive ahk.zip -DestinationPath ahk
           Expand-Archive compiler.zip -DestinationPath ahk
 
-      # 3) Derleme
-      - name: Derleme İşlemi (x64 ve x32)
+      # 3) Derleme (src klasöründe çalıştırılır) ---------------------------------
+      - name: Derleme (x64 ve x32)
         shell: pwsh
         run: |
-          $compiler = "ahk\Ahk2Exe.exe"
-          if (!(Test-Path $compiler)) {
+          $compiler = "..\ahk\Ahk2Exe.exe"
+          $ahk64    = "..\ahk\AutoHotkey64.exe"
+          $ahk32    = "..\ahk\AutoHotkey32.exe"
+
+          if (!(Test-Path "ahk\Ahk2Exe.exe")) {
               Write-Error "Ahk2Exe.exe bulunamadı"
               exit 1
           }
-      
-          $ahk64 = "ahk\AutoHotkey64.exe"
-          $ahk32 = "ahk\AutoHotkey32.exe"
-      
-          if (!(Test-Path $ahk64) -or !(Test-Path $ahk32)) {
-              Write-Error "AutoHotkey32/64.exe bulunamadı"
+
+          if (!(Test-Path "ahk\AutoHotkey64.exe") -or !(Test-Path "ahk\AutoHotkey32.exe")) {
+              Write-Error "AutoHotkey exe bulunamadı"
               exit 1
           }
-      
-          $script = "src/AS Icon Viewer.ahk"
-          if (!(Test-Path $script)) {
-              Write-Error "AHK script bulunamadı"
-              exit 1
-          }
-      
+
+          Push-Location src
+
           # x64
-          & "$compiler" `
-            /in "$script" `
-            /base "$ahk64" `
-            /out "AS-Icon-Viewer-x64.exe"
-      
+          & $compiler `
+            /in "AS Icon Viewer.ahk" `
+            /base $ahk64 `
+            /out "..\AS-Icon-Viewer-x64.exe"
+
           # x32
-          & "$compiler" `
-            /in "$script" `
-            /base "$ahk32" `
-            /out "AS-Icon-Viewer-x32.exe"
+          & $compiler `
+            /in "AS Icon Viewer.ahk" `
+            /base $ahk32 `
+            /out "..\AS-Icon-Viewer-x32.exe"
 
+          Pop-Location
 
-      # 4) Release oluştur
+      # 4) Exe gerçekten oluştu mu kontrol --------------------------------
+      - name: Çıktı Kontrol
+        shell: pwsh
+        run: |
+          if (!(Test-Path "AS-Icon-Viewer-x64.exe") -or !(Test-Path "AS-Icon-Viewer-x32.exe")) {
+              Write-Error "Exe dosyaları oluşmadı"
+              exit 1
+          }
+
+      # 5) Release oluştur -----------------------------------------------
       - name: Release Oluştur
         uses: softprops/action-gh-release@v2
         with:
