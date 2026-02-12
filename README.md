@@ -3,7 +3,7 @@
 [![AutoHotkey](https://img.shields.io/badge/Language-AutoHotkey_v2-green.svg)](https://www.autohotkey.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows-blue.svg)](https://www.microsoft.com/windows)
 [![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.3-brightgreen.svg)](https://github.com/akcansoft/AS-Icon-Viewer/releases)
+[![Version](https://img.shields.io/badge/Version-1.3.1-brightgreen.svg)](https://github.com/akcansoft/AS-Icon-Viewer/releases)
 
 ![GitHub stars](https://img.shields.io/github/stars/akcansoft/AS-Icon-Viewer?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/akcansoft/AS-Icon-Viewer?style=social)
