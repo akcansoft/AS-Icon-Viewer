@@ -1,13 +1,12 @@
 ;@Ahk2Exe-SetName AS Icon Viewer
 ;@Ahk2Exe-SetDescription AS Icon Viewer
-;@Ahk2Exe-SetFileVersion 1.3
+;@Ahk2Exe-SetFileVersion 1.3.1
 ;@Ahk2Exe-SetCompanyName AkcanSoft
 ;@Ahk2Exe-SetCopyright ©2026 Mesut Akcan
 ;@Ahk2Exe-SetMainIcon app_icon.ico
-;@Ahk2Exe-ExeName "AS Icon Viewer.exe"
 
 ; AS Icon Viewer
-; 10/02/2026
+; 12/02/2026
 
 ; Mesut Akcan
 ; -----------
@@ -28,7 +27,7 @@ try TraySetIcon(A_ScriptDir "\app_icon.ico")
 ;@Ahk2Exe-IgnoreEnd
 
 ; Global variables
-A_ScriptName := "AS Icon Viewer v1.3"
+A_ScriptName := "AS Icon Viewer v1.3.1"
 global SettingsFile := A_ScriptDir "\saved_files.txt" ; For storing user-added files in the left panel
 global FavoritesFile := A_ScriptDir "\favorites.txt" ; For storing favorite icons
 global CurrentDllPath := "" ; Currently loaded DLL/EXE/ICO file path
@@ -62,7 +61,8 @@ global Symbol := {
 	Color: "🎨",
 	Search: "🔍",
 	About: "❓",
-	Web: "🌐"
+	Web: "🌐",
+	Exit: "✖️"
 }
 
 global Txt := {
@@ -85,7 +85,7 @@ global Txt := {
 	RemoveFile: Symbol.Remove " &Remove File",
 	ClearList: Symbol.Clear " &Clear List",
 	OpenFolder: Symbol.File " &Open File Location",
-	Exit: "⏻ E&xit",
+	Exit: Symbol.Exit " E&xit",
 	Refresh: "&Refresh",
 	CopyImage: Symbol.Copy " Co&py Image",
 	SaveImage: Symbol.Save " &Save Image ",
