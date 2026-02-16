@@ -8,7 +8,7 @@
 ![GitHub stars](https://img.shields.io/github/stars/akcansoft/AS-Icon-Viewer?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/akcansoft/AS-Icon-Viewer?style=social)
 ![GitHub issues](https://img.shields.io/github/issues/akcansoft/AS-Icon-Viewer)
-[![Downloads](https://img.shields.io/github/downloads/akcansoft/Pixel-Color/total)](https://github.com/akcansoft/Pixel-Color/releases)
+[![Downloads](https://img.shields.io/github/downloads/akcansoft/AS-Icon-Viewer/total)](https://github.com/akcansoft/Pixel-Color/releases)
 
 > A professional-grade icon extraction and management tool for Windows, built with [AutoHotkey v2](https://www.autohotkey.com/)
 
