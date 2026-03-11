@@ -3,50 +3,28 @@
 [![AutoHotkey](https://img.shields.io/badge/Language-AutoHotkey_v2-green.svg)](https://www.autohotkey.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows-blue.svg)](https://www.microsoft.com/windows)
 [![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.3.1-brightgreen.svg)](https://github.com/akcansoft/AS-Icon-Viewer/releases)
+[![Version](https://img.shields.io/badge/Version-1.4-brightgreen.svg)](https://github.com/akcansoft/AS-Icon-Viewer/releases)
 
 ![GitHub stars](https://img.shields.io/github/stars/akcansoft/AS-Icon-Viewer?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/akcansoft/AS-Icon-Viewer?style=social)
 ![GitHub issues](https://img.shields.io/github/issues/akcansoft/AS-Icon-Viewer)
-[![Downloads](https://img.shields.io/github/downloads/akcansoft/AS-Icon-Viewer/total)](https://github.com/akcansoft/Pixel-Color/releases)
+[![Downloads](https://img.shields.io/github/downloads/akcansoft/AS-Icon-Viewer/total)](https://github.com/akcansoft/AS-Icon-Viewer/releases)
 
-> A professional-grade icon extraction and management tool for Windows, built with [AutoHotkey v2](https://www.autohotkey.com/)
+> A high-performance utility to browse, preview, and export icons from DLL, EXE, and ICO files, built with [AutoHotkey v2](https://www.autohotkey.com/)
 
-**AS Icon Viewer** empowers developers and power users to effortlessly view, extract, and manage icons embedded within Windows executables (`.exe`), dynamic-link libraries (`.dll`), and icon files (`.ico`). Perfect for finding icon indices, exporting high-quality assets, and managing your favorite icons.
+**AS Icon Viewer** helps developers and power users browse, extract, and manage icons embedded in Windows executables (`.exe`), libraries (`.dll`), and icon files (`.ico`). Shortcuts (`.lnk`) are resolved to their targets, making it easy to build icon sets, find indices, copy to clipboard, and export high-quality assets.
 
 ![AS Icon Viewer Screenshot](docs/screen-shot-1.png)
-
-## 🆕 What's New (v1.3)
-
-- **Direct View Switching:** Replaced the "Switch View" cycle button with a direct DropDownList for instant access to any view mode.
-- **Advanced 3-Panel StatusBar:** New native status bar showing operation status, icon counts, and active file paths in separate segments.
-- **File Location Explorer:** Added "Open File Location" to the file list context menu to quickly find source files in Windows Explorer.
-- **Multi-Select Support:** Enabled multiple file and favorite selection, allowing for bulk removal and more efficient list management.
-- **Recursive Layout Consistency:** Realigned all control buttons (Add/Remove/Clear) to be positioned above their respective lists, creating a unified and professional visual flow.
-- **Internal Optimization:** Unified file processing logic for both manual selection and Drag & Drop, with improved `.lnk` shortcut resolution.
-- **Redesigned Symbols:** Modernized notification system using a centralized Symbol object for consistent visual feedback (info, success, warnings).
-- **Refined Menu System:** Reorganized Menu Bar with intuitive access keys (Alt hotkeys) and clearer menu structures.
-
-## 📜 Version History
-
-### v1.2 : 09/02/2026
-- **Export Size Selector:** Choose 16–256px sizes for preview and saved icons
-- **Better Transparency:** Clipboard copy now uses PNG with alpha
-- **Improved Exports:** Higher-quality alpha handling and cleaner ICO output
-- **Smarter Save Dialog:** File extension follows the selected file type
-
-### v1.1 : 07/02/2026
-
-### v1.0 : 05/02/2026
-- First Release
 
 ## ✨ Key Features
 
 ### 🔍 Smart Icon Management
 - **Intelligent Resource Scanner:** Instantly scan system libraries (`shell32.dll`, `imageres.dll`, etc.) or custom files
 - **Drag & Drop Support:** Simply drop any `.dll`, `.exe`, `.ico`, or `.lnk` file onto the interface
+- **Shortcut Resolution:** `.lnk` files are resolved to their target icon sources
 - **Dynamic Icon Counting:** Automatically detects and loads all available icons using Windows API
 - **Persistent File History:** Your recently accessed files are automatically saved and restored
+- **Multi-Select File List:** Remove multiple files at once for faster cleanup
 
 ### 🖼️ Flexible Viewing Options
 - **Multiple View Modes:** Toggle between:
@@ -56,12 +34,15 @@
   - Small Report View
 - **Adjustable Preview Size:** 16–256px icon preview with index display
 - **Responsive Layout:** Fully resizable interface that adapts to your screen
+- **Interpolation Control:** Toggle high-quality scaling vs nearest-neighbor for crisp or smooth previews
 
 ### ⭐ Favorites System
 - **Bookmark Icons:** Save frequently used icons to your favorites list
 - **Persistent Storage:** Favorites are automatically saved across sessions
 - **Quick Access:** Instantly preview and use your bookmarked icons
 - **Bulk Management:** Add, remove, or clear favorites with ease
+- **Go to Source:** Jump from a favorite to its original file and icon index
+- **File Tools:** Open File Location and view file Properties from favorites
 
 ### 📥 Advanced Export Capabilities
 - **Multiple Formats:** Save icons as:
@@ -80,12 +61,44 @@
   ```
 - **Live Icon Testing:** Apply selected icons to the application's window and tray for instant preview
 - **Index Display:** Clear labeling of icon numbers for easy reference in code
+- **Fast Copy:** Double-click an icon to copy its code immediately
 
 ### 🚀 Performance & Reliability
 - **High-Speed Extraction:** Utilizes Windows API (`PrivateExtractIconsW`) for optimal performance
 - **Memory Efficient:** Smart ImageList management prevents memory leaks
 - **Progress Indicators:** Real-time loading feedback for large icon libraries
 - **GDI+ Integration:** High-quality icon rendering and format conversion
+
+## 📜 Version History
+
+### v1.4 : 11/03/2026
+
+- **Interpolation Toggle:** Switch between high-quality scaling and nearest-neighbor for preview, copy, and export.
+- **Favorites Navigation:** "Go to Source" jumps from a favorite to the original file and icon index.
+- **File Utilities:** Quick "Open File Location" and "Properties" actions in menus and favorites context.
+- **Live Preview Resizing:** 16–256px preview size updates the layout on the fly.
+- **Refresh Actions:** Reload icons from the Icon View menu or the icon context menu.
+
+### v1.3 : 10/02/2026
+- **Direct View Switching:** Replaced the "Switch View" cycle button with a direct DropDownList for instant access to any view mode.
+- **Advanced 3-Panel StatusBar:** New native status bar showing operation status, icon counts, and active file paths in separate segments.
+- **File Location Explorer:** Added "Open File Location" to the file list context menu to quickly find source files in Windows Explorer.
+- **Multi-Select Support:** Enabled multiple file and favorite selection, allowing for bulk removal and more efficient list management.
+- **Recursive Layout Consistency:** Realigned all control buttons (Add/Remove/Clear) to be positioned above their respective lists, creating a unified and professional visual flow.
+- **Internal Optimization:** Unified file processing logic for both manual selection and Drag & Drop, with improved `.lnk` shortcut resolution.
+- **Redesigned Symbols:** Modernized notification system using a centralized Symbol object for consistent visual feedback (info, success, warnings).
+- **Refined Menu System:** Reorganized Menu Bar with intuitive access keys (Alt hotkeys) and clearer menu structures.
+
+### v1.2 : 09/02/2026
+- **Export Size Selector:** Choose 16–256px sizes for preview and saved icons
+- **Better Transparency:** Clipboard copy now uses PNG with alpha
+- **Improved Exports:** Higher-quality alpha handling and cleaner ICO output
+- **Smarter Save Dialog:** File extension follows the selected file type
+
+### v1.1 : 07/02/2026
+
+### v1.0 : 05/02/2026
+- First Release
 
 ## 📋 System Requirements
 
@@ -131,6 +144,7 @@
 - **Export:** Click **💾 Save** to export in your preferred format
 - **Test:** Click **🧪 Test icon** to preview it as the app icon
 - **Add to Favorites:** Click **➕ Add** in the favorites section
+- **Interpolation:** Use the **Interpolation** checkbox or Icon menu to switch scaling quality
 
 ### View Modes
 - Use the **DropDownList** next to the Icons label or the **Icon View** menu to select:
@@ -151,6 +165,11 @@
   - Open File Location
   - Add/Remove File
   - Clear List
+- **Right-click on favorites** for:
+  - Copy Image / Save Image
+  - Copy Code / Test Icon
+  - Go to Source / Open File Location / Properties
+  - Remove from Favorites
 
 ## 🎮 Interface Overview
 
