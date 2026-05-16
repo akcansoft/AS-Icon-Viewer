@@ -14,7 +14,7 @@
 ;
 ; Author: Mesut Akcan
 ; Home: mesutakcan.blogspot.com
-; Source: github.com/akcansoft/AS-Icon-Viewer
+; Source: github.com/mesutakcan/AS-Icon-Viewer
 ; YouTube: youtube.com/mesutakcan
 
 #Requires AutoHotkey v2
@@ -35,7 +35,7 @@ global App := {
 	DllListFile: A_ScriptDir "\saved_files.txt",
 	FavoritesFile: A_ScriptDir "\favorites.txt",
 	WebUrl: "https://mesutakcan.blogspot.com",
-	GitHubUrl: "https://github.com/akcansoft/AS-Icon-Viewer"
+	GitHubUrl: "https://github.com/mesutakcan/AS-Icon-Viewer"
 }
 
 global IL := {
@@ -1610,7 +1610,7 @@ ShowAbout(*) {
 		`n`nA professional utility to browse, preview, and export icons from DLL, EXE, and ICO files.`n
 		Mesut Akcan
 		mesutakcan.blogspot.com
-		github.com/akcansoft
+		github.com/mesutakcan
 		youtube.com/mesutakcan
 	)"
 
