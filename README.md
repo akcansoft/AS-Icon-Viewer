@@ -3,12 +3,12 @@
 [![AutoHotkey](https://img.shields.io/badge/Language-AutoHotkey_v2-green.svg)](https://www.autohotkey.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows-blue.svg)](https://www.microsoft.com/windows)
 [![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.4-brightgreen.svg)](https://github.com/akcansoft/AS-Icon-Viewer/releases)
+[![Version](https://img.shields.io/badge/Version-1.4-brightgreen.svg)](https://github.com/mesutakcan/AS-Icon-Viewer/releases)
 
-![GitHub stars](https://img.shields.io/github/stars/akcansoft/AS-Icon-Viewer?style=social)
-![GitHub forks](https://img.shields.io/github/forks/akcansoft/AS-Icon-Viewer?style=social)
-![GitHub issues](https://img.shields.io/github/issues/akcansoft/AS-Icon-Viewer)
-[![Downloads](https://img.shields.io/github/downloads/akcansoft/AS-Icon-Viewer/total)](https://github.com/akcansoft/AS-Icon-Viewer/releases)
+![GitHub stars](https://img.shields.io/github/stars/mesutakcan/AS-Icon-Viewer?style=social)
+![GitHub forks](https://img.shields.io/github/forks/mesutakcan/AS-Icon-Viewer?style=social)
+![GitHub issues](https://img.shields.io/github/issues/mesutakcan/AS-Icon-Viewer)
+[![Downloads](https://img.shields.io/github/downloads/mesutakcan/AS-Icon-Viewer/total)](https://github.com/mesutakcan/AS-Icon-Viewer/releases)
 
 > A high-performance utility to browse, preview, and export icons from DLL, EXE, and ICO files, built with [AutoHotkey v2](https://www.autohotkey.com/)
 
@@ -109,7 +109,7 @@
 ## 📦 Installation
 
 ### Option 1: Download Compiled Executable (Recommended)
-1. Download the latest release from [Releases](https://github.com/akcansoft/AS-Icon-Viewer/releases)
+1. Download the latest release from [Releases](https://github.com/mesutakcan/AS-Icon-Viewer/releases)
    - `AS.Icon.Viewer_x64.exe` for 64-bit Windows
    - `AS.Icon.Viewer_x32.exe` for 32-bit Windows
 2. Run the executable - no installation required!
@@ -118,7 +118,7 @@
 1. Install [AutoHotkey v2.0+](https://www.autohotkey.com/)
 2. Clone this repository:
    ```bash
-   git clone https://github.com/akcansoft/AS-Icon-Viewer.git
+   git clone https://github.com/mesutakcan/AS-Icon-Viewer.git
    ```
 3. Ensure these files are in the same directory:
    - `AS Icon Viewer.ahk`
@@ -256,5 +256,5 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 **Mesut Akcan**
 
 - 🌐 Blog: [mesutakcan.blogspot.com](https://mesutakcan.blogspot.com)
-- 💻 GitHub: [@akcansoft](https://github.com/akcansoft)
+- 💻 GitHub: [@mesutakcan](https://github.com/mesutakcan)
 - 📺 YouTube: [mesutakcan](https://youtube.com/mesutakcan)
